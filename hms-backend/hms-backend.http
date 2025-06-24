@@ -1,0 +1,6 @@
+@hms_backend_HostAddress = http://localhost:5175
+
+GET {{hms_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
