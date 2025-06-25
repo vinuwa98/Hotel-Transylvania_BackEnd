@@ -19,6 +19,19 @@ namespace HmsBackend
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Complaint>()
+    .HasOne(c => c.User)
+    .WithMany(u => u.Complaints)
+    .HasForeignKey(c => c.UserId)
+    .OnDelete(DeleteBehavior.Restrict); // Or DeleteBehavior.NoAction
+
+            modelBuilder.Entity<Complaint>()
+                .HasOne(c => c.Room)
+                .WithMany(r => r.Complaints)
+                .HasForeignKey(c => c.RoomId)
+                .OnDelete(DeleteBehavior.Restrict); // Or DeleteBehavior.NoAction
+
+
             modelBuilder.Entity<Job>()
                 .HasOne(j => j.CreatedUser)
                 .WithMany()

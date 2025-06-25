@@ -56,7 +56,7 @@ namespace HmsBackend.Models
 
         public int? SupervisorID { get; set; }
 
-        // Navigation Properties
+      
         public List<Room> Rooms { get; set; } = new();
         public List<Complaint> Complaints { get; set; } = new();
         public List<JobUser> JobUsers { get; set; } = new();
