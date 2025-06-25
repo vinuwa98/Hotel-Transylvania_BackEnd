@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
 using System;
 using System.Text;
 
@@ -64,6 +65,8 @@ if (app.Environment.IsDevelopment())
         options.SwaggerEndpoint("openapi/v1.json", ".NET Web API");
         options.RoutePrefix = string.Empty;
     });
+
+    app.MapScalarApiReference();
 
     using (var scope = app.Services.CreateScope())
     {
