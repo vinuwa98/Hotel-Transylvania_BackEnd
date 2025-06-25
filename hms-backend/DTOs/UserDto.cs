@@ -1,4 +1,4 @@
-﻿namespace hms_backend.Dto
+﻿namespace HmsBackend.Dto
 {
     public class UserDto
     {

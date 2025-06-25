@@ -1,4 +1,5 @@
-﻿using hms_backend.Dto;
+﻿using HmsBackend.Dto;
+using HmsBackend.DTOs;
 using HmsBackend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -21,23 +22,23 @@ namespace HmsBackend.Controllers
         [Authorize(Policy = "AdminOnly")]
         [Route("register")]
         [HttpPost]
-        public async Task<IActionResult> Register(UserDto _user)
+        public async Task<IActionResult> Register(RegistrationDto registerRequest)
         {
             try
             {
-                if (_user == null) return BadRequest();
+                if (registerRequest == null) return BadRequest();
 
                 var identityUser = new IdentityUser
                 {
-                    UserName = _user.UserName,
-                    Email = _user.Email
+                    UserName = registerRequest.User.UserName,
+                    Email = registerRequest.User.Email
                 };
 
-                var result = await _userManager.CreateAsync(identityUser, _user.Password);
+                var result = await _userManager.CreateAsync(identityUser, registerRequest.User.Password);
 
                 if (result.Succeeded)
                 {
-                    await _userManager.AddToRoleAsync(identityUser, "User");
+                    await _userManager.AddToRoleAsync(identityUser, registerRequest.Role);
                     return NoContent();
                 }
                 else
@@ -62,17 +63,28 @@ namespace HmsBackend.Controllers
 
                 if (_user != null && await _userManager.CheckPasswordAsync(_user, user.Password))
                 {
-                    IdentityOptions identityOptions = new();
+                    var roles = await _userManager.GetRolesAsync(_user);
+
+                    var claims = new List<Claim>
+                    {
+                        new Claim("UserId", _user.Id.ToString())
+                    };
+
+                    foreach (var role in roles)
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, role));
+                    }
 
                     var tokenDescriptor = new SecurityTokenDescriptor
                     {
-                        Subject = new ClaimsIdentity(new Claim[] {
-                            new Claim("UserId", _user.Id.ToString())
-                        }),
+                        Subject = new ClaimsIdentity(claims),
                         Issuer = _configuration["Jwt:Issuer"],
                         Audience = _configuration["Jwt:Audience"],
                         Expires = DateTime.UtcNow.AddMonths(1),
-                        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])), SecurityAlgorithms.HmacSha256Signature),
+                        SigningCredentials = new SigningCredentials(
+                            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])),
+                            SecurityAlgorithms.HmacSha256Signature
+                        ),
                     };
 
                     var tokenHandler = new JwtSecurityTokenHandler();
@@ -88,11 +100,10 @@ namespace HmsBackend.Controllers
             }
             catch (Exception ex)
             {
-                {
-                    Console.WriteLine(ex.ToString());
-                    return StatusCode(500);
-                }
+                Console.WriteLine(ex.ToString());
+                return StatusCode(500);
             }
         }
+
     }
 }
