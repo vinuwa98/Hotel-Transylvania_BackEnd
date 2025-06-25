@@ -1,4 +1,6 @@
-﻿using HmsBackend.Models;
+﻿using hms_backend.Dto;
+using HmsBackend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,29 +11,33 @@ using System.Text;
 
 namespace HmsBackend.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class AccountController(UserManager<IdentityUser> userManager, IConfiguration configuration) : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager = userManager;
         private readonly IConfiguration _configuration = configuration;
 
-        [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
         [Route("register")]
-        public async Task<IActionResult> Register(User account)
+        [HttpPost]
+        public async Task<IActionResult> Register(UserDto _user)
         {
             try
             {
-                if (account == null) return BadRequest();
+                if (_user == null) return BadRequest();
 
-                var result = await _userManager.CreateAsync(new IdentityUser
+                var identityUser = new IdentityUser
                 {
-                    UserName = account.UserName,
-                    Email = account.Email
-                }, account.Password);
+                    UserName = _user.UserName,
+                    Email = _user.Email
+                };
+
+                var result = await _userManager.CreateAsync(identityUser, _user.Password);
 
                 if (result.Succeeded)
                 {
+                    await _userManager.AddToRoleAsync(identityUser, "User");
                     return NoContent();
                 }
                 else
@@ -48,7 +54,7 @@ namespace HmsBackend.Controllers
 
         [HttpPost]
         [Route("login")]
-        public async Task<IActionResult> Login(User user)
+        public async Task<IActionResult> Login(UserDto user)
         {
             try
             {
