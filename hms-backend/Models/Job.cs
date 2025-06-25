@@ -23,12 +23,12 @@ namespace HmsBackend.Models
         public string? Priority { get; set; }
 
         [Required]
-        public int CreatedUserId { get; set; }
+        public string CreatedUserId { get; set; }
 
         public User CreatedUser { get; set; }
 
         [Required]
-        public int AssignedManagerUserId { get; set; }
+        public string AssignedManagerUserId { get; set; }
 
         public User AssignedManagereUser { get; set; }
 

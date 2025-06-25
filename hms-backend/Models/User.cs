@@ -4,10 +4,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HmsBackend.Models
 {
-    public class User
+    public class User : IdentityUser
     {
-        [Key]
-        public int id { get; set; }
+        //[Key]
+        //public int id { get; set; }
 
         [Required]
         [MaxLength(50)] // limit to 50 characters
