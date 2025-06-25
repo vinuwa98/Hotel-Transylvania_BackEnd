@@ -1,4 +1,4 @@
-﻿namespace hms_backend.Repositories
+﻿namespace HmsBackend.Repositories
 {
     public class ComplaintRepository
     {

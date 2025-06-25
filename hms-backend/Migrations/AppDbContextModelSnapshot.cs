@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace hms_backend.Migrations
+namespace HmsBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
@@ -22,6 +22,107 @@ namespace hms_backend.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("HmsBackend.Models.Complaint", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ImgUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoomId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Complaint");
+                });
+
+            modelBuilder.Entity("HmsBackend.Models.Job", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AssignedManagerUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ComplaintId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CreatedUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Priority")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignedManagerUserId");
+
+                    b.HasIndex("ComplaintId");
+
+                    b.HasIndex("CreatedUserId");
+
+                    b.ToTable("Job");
+                });
+
+            modelBuilder.Entity("HmsBackend.Models.JobUser", b =>
+                {
+                    b.Property<int>("JobId")
+                        .HasColumnType("int")
+                        .HasColumnOrder(0);
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1);
+
+                    b.HasKey("JobId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("JobUser");
+                });
+
             modelBuilder.Entity("HmsBackend.Models.Room", b =>
                 {
                     b.Property<int>("RoomId")
@@ -32,7 +133,8 @@ namespace hms_backend.Migrations
 
                     b.Property<string>("RoomType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -53,7 +155,8 @@ namespace hms_backend.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Address")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("ContactNumber")
                         .HasColumnType("nvarchar(max)");
@@ -68,9 +171,13 @@ namespace hms_backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("SupervisorID")
+                        .HasColumnType("int");
+
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
@@ -275,77 +382,69 @@ namespace hms_backend.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("hms_backend.Models.Complaint", b =>
+            modelBuilder.Entity("HmsBackend.Models.Complaint", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.HasOne("HmsBackend.Models.Room", "Room")
+                        .WithMany("Complaints")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.HasOne("HmsBackend.Models.User", "User")
+                        .WithMany("Complaints")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<DateTime>("DateTime")
-                        .HasColumnType("datetime2");
+                    b.Navigation("Room");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ImgUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("RoomId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoomId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Complaint");
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("hms_backend.Models.Job", b =>
+            modelBuilder.Entity("HmsBackend.Models.Job", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.HasOne("HmsBackend.Models.User", "AssignedManagereUser")
+                        .WithMany()
+                        .HasForeignKey("AssignedManagerUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.HasOne("HmsBackend.Models.Complaint", "Complaint")
+                        .WithMany("Jobs")
+                        .HasForeignKey("ComplaintId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<int>("ComplaintId")
-                        .HasColumnType("int");
+                    b.HasOne("HmsBackend.Models.User", "CreatedUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                    b.Navigation("AssignedManagereUser");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Navigation("Complaint");
 
-                    b.Property<string>("Priority")
-                        .HasColumnType("nvarchar(max)");
+                    b.Navigation("CreatedUser");
+                });
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            modelBuilder.Entity("HmsBackend.Models.JobUser", b =>
+                {
+                    b.HasOne("HmsBackend.Models.Job", "Job")
+                        .WithMany("JobUsers")
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.HasOne("HmsBackend.Models.User", "User")
+                        .WithMany("JobUsers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasKey("Id");
+                    b.Navigation("Job");
 
-                    b.HasIndex("ComplaintId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Job");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("HmsBackend.Models.Room", b =>
@@ -410,42 +509,14 @@ namespace hms_backend.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("hms_backend.Models.Complaint", b =>
+            modelBuilder.Entity("HmsBackend.Models.Complaint", b =>
                 {
-                    b.HasOne("HmsBackend.Models.Room", "Room")
-                        .WithMany("Complaints")
-                        .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("HmsBackend.Models.User", "User")
-                        .WithMany("Complaints")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Room");
-
-                    b.Navigation("User");
+                    b.Navigation("Jobs");
                 });
 
-            modelBuilder.Entity("hms_backend.Models.Job", b =>
+            modelBuilder.Entity("HmsBackend.Models.Job", b =>
                 {
-                    b.HasOne("hms_backend.Models.Complaint", "Complaint")
-                        .WithMany("Jobs")
-                        .HasForeignKey("ComplaintId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("HmsBackend.Models.User", "User")
-                        .WithMany("Jobs")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Complaint");
-
-                    b.Navigation("User");
+                    b.Navigation("JobUsers");
                 });
 
             modelBuilder.Entity("HmsBackend.Models.Room", b =>
@@ -457,14 +528,9 @@ namespace hms_backend.Migrations
                 {
                     b.Navigation("Complaints");
 
-                    b.Navigation("Jobs");
+                    b.Navigation("JobUsers");
 
                     b.Navigation("Rooms");
-                });
-
-            modelBuilder.Entity("hms_backend.Models.Complaint", b =>
-                {
-                    b.Navigation("Jobs");
                 });
 #pragma warning restore 612, 618
         }

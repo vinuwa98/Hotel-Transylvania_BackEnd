@@ -1,4 +1,4 @@
-﻿namespace hms_backend.DTOs
+﻿namespace HmsBackend.DTOs
 {
     public class ComplaintDto
     {

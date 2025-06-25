@@ -1,23 +1,36 @@
 ﻿using HmsBackend.Models;
+using System.ComponentModel.DataAnnotations;
 
-namespace hms_backend.Models
+namespace HmsBackend.Models
 {
     public class Complaint
     {
+        [Key]
         public int Id { get; set; }
-        public required string Title { get; set; }
-        public required DateTime DateTime { get; set; }
+
+        [Required]
+        [MaxLength(100)]
+        public string Title { get; set; }
+
+        [Required]
+        public DateTime DateTime { get; set; }
+
+        [MaxLength(500)]
         public string? Description { get; set; }
+
+        [Url]
         public string? ImgUrl { get; set; }
 
+        [Required]
         public int UserId { get; set; }
 
         public User User { get; set; }
-        public Room Room { get; set; }
+
+        [Required]
         public int RoomId { get; set; }
 
-        public List<Job> Jobs { get; set; }
+        public Room Room { get; set; }
 
-
+        public List<Job> Jobs { get; set; } = new();
     }
 }

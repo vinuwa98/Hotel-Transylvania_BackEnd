@@ -1,4 +1,4 @@
-﻿namespace hms_backend.Repositories.Interfaces
+﻿namespace HmsBackend.Repositories.Interfaces
 {
     public interface IUserRepository
     {

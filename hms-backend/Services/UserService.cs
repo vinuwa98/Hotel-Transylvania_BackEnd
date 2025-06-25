@@ -1,4 +1,4 @@
-﻿namespace hms_backend.Services
+﻿namespace HmsBackend.Services
 {
     public class UserService
     {

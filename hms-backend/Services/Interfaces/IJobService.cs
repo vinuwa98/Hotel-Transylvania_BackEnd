@@ -1,6 +1,6 @@
-﻿using hms_backend.Models;
+﻿using HmsBackend.Models;
 
-namespace hms_backend.Services.Interfaces
+namespace HmsBackend.Services.Interfaces
 {
     public interface IJobService
     {

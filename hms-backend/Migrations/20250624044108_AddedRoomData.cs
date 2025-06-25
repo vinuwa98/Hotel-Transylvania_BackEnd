@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace hms_backend.Migrations
+namespace HmsBackend.Migrations
 {
     /// <inheritdoc />
     public partial class AddedRoomData : Migration

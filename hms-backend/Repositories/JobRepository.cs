@@ -1,5 +1,5 @@
-﻿using hms_backend.Models;
-using hms_backend.Repositories.Interfaces;
+﻿using HmsBackend.Models;
+using HmsBackend.Repositories.Interfaces;
 using HmsBackend;
 using Microsoft.EntityFrameworkCore;
 /*

@@ -1,6 +1,6 @@
-﻿using hms_backend.Models;
-using hms_backend.Repositories.Interfaces;
-using hms_backend.Services.Interfaces;
+﻿using HmsBackend.Models;
+using HmsBackend.Repositories.Interfaces;
+using HmsBackend.Services.Interfaces;
 /*
 namespace hms_backend.Services
 {

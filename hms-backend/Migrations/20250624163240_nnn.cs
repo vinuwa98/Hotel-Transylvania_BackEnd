@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace hms_backend.Migrations
+namespace HmsBackend.Migrations
 {
     /// <inheritdoc />
     public partial class nnn : Migration
