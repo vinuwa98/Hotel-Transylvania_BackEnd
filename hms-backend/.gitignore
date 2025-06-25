@@ -17,6 +17,7 @@
 ###################
 [Bb]in/
 [Oo]bj/
+<<<<<<< HEAD:hms-backend/.gitignore.txt
 [Oo]ut/
 [Dd]ebug/
 [Rr]elease/
@@ -31,6 +32,33 @@ x86/
 *.dll.config
 *.tmp
 *.log
+=======
+
+# Visual Studio 2015 cache/options directory
+.vs/
+
+# MSTest test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# NUNIT
+*.VisualState.xml
+TestResult.xml
+
+# Build Results of an ATL Project
+[Dd]ebugPS/
+[Rr]eleasePS/
+dlldata.c
+
+# DNX
+project.lock.json
+artifacts/
+
+*_i.c
+*_p.c
+*_i.h
+*.ilk
+>>>>>>> damian/backend:hms-backend/.gitignore
 *.meta
 *.tmp_proj
 *.pidb
@@ -203,6 +231,7 @@ ClientBin/
 *.rdl.data
 *.bim.layout
 *.bim_*.settings
+<<<<<<< HEAD:hms-backend/.gitignore.txt
 *.rptproj.rsuser
 *- [Bb]ackup*.rdl
 Generated_Code/
@@ -215,3 +244,17 @@ Generated_Code/
 AutoTest.Net/
 .axoCover/*
 !.axoCover/settings.json
+=======
+
+# Microsoft Fakes
+FakesAssemblies/
+
+# Node.js Tools for Visual Studio
+.ntvs_analysis.dat
+
+# Visual Studio 6 build log
+*.plg
+
+# Visual Studio 6 workspace options file
+*.opt
+>>>>>>> damian/backend:hms-backend/.gitignore

@@ -1,4 +1,5 @@
 ﻿using HmsBackend.Models;
+using HmsBackend.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 namespace HmsBackend
@@ -10,6 +11,8 @@ namespace HmsBackend
 
         public DbSet<Complaint> Complaint => Set<Complaint>();
         public DbSet<Job> Job => Set<Job>();
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -53,14 +56,14 @@ namespace HmsBackend
             modelBuilder.Entity<JobUser>()
                 .HasOne(ju => ju.Job)
                 .WithMany(j => j.JobUsers)
-                .HasForeignKey(ju => ju.JobId)
-                .OnDelete(DeleteBehavior.Restrict); // or .NoAction
+                .HasForeignKey(ju => ju.JobId);
 
             modelBuilder.Entity<JobUser>()
                 .HasOne(ju => ju.User)
                 .WithMany(u => u.JobUsers)
-                .HasForeignKey(ju => ju.UserId)
-                .OnDelete(DeleteBehavior.Restrict); // or .NoAction
+                .HasForeignKey(ju => ju.UserId);
         }
+
+
     }
 }

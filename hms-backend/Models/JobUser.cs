@@ -1,5 +1,4 @@
-﻿using HmsBackend.Models;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HmsBackend.Models
@@ -12,7 +11,7 @@ namespace HmsBackend.Models
         public Job Job { get; set; }
 
         [Key, Column(Order = 1)]
-        public int UserId { get; set; }
+        public string UserId { get; set; }
 
         public User User { get; set; }
     }
