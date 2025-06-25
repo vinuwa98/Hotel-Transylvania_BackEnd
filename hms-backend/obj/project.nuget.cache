@@ -1,7 +1,11 @@
 {
   "version": 2,
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   "dgSpecHash": "XzNMo1ghktg=",
+=======
+  "dgSpecHash": "abQH88y4WzQ=",
+>>>>>>> Stashed changes
 =======
   "dgSpecHash": "abQH88y4WzQ=",
 >>>>>>> Stashed changes
@@ -59,6 +63,10 @@
     "C:\\Users\\DamianRodrigo\\.nuget\\packages\\microsoft.win32.systemevents\\6.0.0\\microsoft.win32.systemevents.6.0.0.nupkg.sha512",
     "C:\\Users\\DamianRodrigo\\.nuget\\packages\\mono.texttemplating\\3.0.0\\mono.texttemplating.3.0.0.nupkg.sha512",
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+    "C:\\Users\\DamianRodrigo\\.nuget\\packages\\scalar.aspnetcore\\2.5.0\\scalar.aspnetcore.2.5.0.nupkg.sha512",
+>>>>>>> Stashed changes
 =======
     "C:\\Users\\DamianRodrigo\\.nuget\\packages\\scalar.aspnetcore\\2.5.0\\scalar.aspnetcore.2.5.0.nupkg.sha512",
 >>>>>>> Stashed changes
