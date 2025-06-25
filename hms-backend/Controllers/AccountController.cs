@@ -18,7 +18,7 @@ namespace HmsBackend.Controllers
 
         [HttpPost]
         [Route("register")]
-        public async Task<IActionResult> Register(User account)
+        public async Task<IActionResult> Register([FromBody]User account)
         {
             try
             {
@@ -48,7 +48,7 @@ namespace HmsBackend.Controllers
 
         [HttpPost]
         [Route("login")]
-        public async Task<IActionResult> Login(User user)
+        public async Task<IActionResult> Login([FromBody]User user)
         {
             try
             {
