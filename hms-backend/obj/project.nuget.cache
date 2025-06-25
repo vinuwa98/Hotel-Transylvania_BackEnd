@@ -1,6 +1,10 @@
 {
   "version": 2,
+<<<<<<< Updated upstream
   "dgSpecHash": "XzNMo1ghktg=",
+=======
+  "dgSpecHash": "abQH88y4WzQ=",
+>>>>>>> Stashed changes
   "success": true,
   "projectFilePath": "D:\\Projects\\Hotel-Transylvania\\Hotel-Transylvania_BackEnd\\hms-backend\\hms-backend.csproj",
   "expectedPackageFiles": [
@@ -54,6 +58,10 @@
     "C:\\Users\\DamianRodrigo\\.nuget\\packages\\microsoft.sqlserver.server\\1.0.0\\microsoft.sqlserver.server.1.0.0.nupkg.sha512",
     "C:\\Users\\DamianRodrigo\\.nuget\\packages\\microsoft.win32.systemevents\\6.0.0\\microsoft.win32.systemevents.6.0.0.nupkg.sha512",
     "C:\\Users\\DamianRodrigo\\.nuget\\packages\\mono.texttemplating\\3.0.0\\mono.texttemplating.3.0.0.nupkg.sha512",
+<<<<<<< Updated upstream
+=======
+    "C:\\Users\\DamianRodrigo\\.nuget\\packages\\scalar.aspnetcore\\2.5.0\\scalar.aspnetcore.2.5.0.nupkg.sha512",
+>>>>>>> Stashed changes
     "C:\\Users\\DamianRodrigo\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\9.0.1\\swashbuckle.aspnetcore.swaggerui.9.0.1.nupkg.sha512",
     "C:\\Users\\DamianRodrigo\\.nuget\\packages\\system.clientmodel\\1.0.0\\system.clientmodel.1.0.0.nupkg.sha512",
     "C:\\Users\\DamianRodrigo\\.nuget\\packages\\system.codedom\\6.0.0\\system.codedom.6.0.0.nupkg.sha512",
