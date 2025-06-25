@@ -1,14 +1,13 @@
-﻿using Microsoft.AspNetCore.Identity;
-
-using HmsBackend.Models;
+﻿using HmsBackend.Models;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace HmsBackend.Models
 {
-    public class User : IdentityUser
+    public class User
     {
         [Key]
-        public int Id { get; set; }
+        public int id { get; set; }
 
         [Required]
         [MaxLength(50)] // limit to 50 characters
@@ -33,9 +32,8 @@ namespace HmsBackend.Models
 
         public int? SupervisorID { get; set; }
 
-        // Navigation Properties
-        public List<Room> Rooms { get; set; } = new();
-        public List<Complaint> Complaints { get; set; } = new();
+        //public List<Room> Rooms { get; set; } = new();
+        //public List<Complaint> Complaints { get; set; } = new();
         public List<JobUser> JobUsers { get; set; } = new();
     }
 }

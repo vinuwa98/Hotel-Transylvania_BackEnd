@@ -1,8 +1,6 @@
 ﻿using HmsBackend.Dto;
 using HmsBackend.DTOs;
-using HmsBackend.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -104,6 +102,5 @@ namespace HmsBackend.Controllers
                 return StatusCode(500);
             }
         }
-
     }
 }
