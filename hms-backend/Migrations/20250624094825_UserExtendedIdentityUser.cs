@@ -5,7 +5,7 @@
 namespace HmsBackend.Migrations
 {
     /// <inheritdoc />
-    public partial class AddedRoomData : Migration
+    public partial class UserExtendedIdentityUser : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
