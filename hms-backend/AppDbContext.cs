@@ -7,7 +7,7 @@ namespace HmsBackend
     public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext(options)
     {
         public DbSet<Room> Rooms { get; set; }
-        public DbSet<User> Accounts { get; set; }
+        
 
         public DbSet<Complaint> Complaint => Set<Complaint>();
         public DbSet<Job> Job => Set<Job>();

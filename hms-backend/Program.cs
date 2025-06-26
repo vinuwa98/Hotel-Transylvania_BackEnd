@@ -92,6 +92,10 @@ if (app.Environment.IsDevelopment())
 
 
 using HmsBackend;
+using HmsBackend.Repositories;
+using HmsBackend.Repositories.Interfaces;
+using HmsBackend.Services;
+using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -105,12 +109,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 //dsdffdf
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") // or whatever your frontend runs on
+        policy.WithOrigins("http://localhost:5173") 
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
