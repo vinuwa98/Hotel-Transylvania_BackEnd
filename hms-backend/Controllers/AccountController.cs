@@ -35,5 +35,15 @@ namespace HmsBackend.Controllers
             var result = await _userService.LoginAsync(user);
             return result;
         }
+
+
+        [Authorize(Policy = "AdminOnly")]
+        [HttpPut]
+        [Route("update-user/{userId}")]
+        public async Task<IActionResult> UpdateUser(string userId, UpdateUserDto updateUserDto)
+        {
+            var result = await _userService.UpdateUserAsync(userId, updateUserDto);
+            return result;
+        }
     }
 }

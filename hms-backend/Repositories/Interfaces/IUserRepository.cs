@@ -9,6 +9,8 @@ namespace HmsBackend.Repositories.Interfaces
         Task<IdentityUser?> FindByEmailAsync(string username);
         Task<bool> CheckPasswordAsync(IdentityUser user, string password);
         Task<IList<string>> GetRolesAsync(IdentityUser user);
+
+        Task<IdentityResult> UpdateUserAsync(string userId, UpdateUserDto updateDto);
     }
 }
 

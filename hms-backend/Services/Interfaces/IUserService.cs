@@ -8,5 +8,6 @@ namespace HmsBackend.Services.Interfaces
     {
         Task<IActionResult> AddUserAsync(RegistrationDto registerRequest);
         Task<IActionResult> LoginAsync(UserDto user);
+        Task<IActionResult> UpdateUserAsync(string userId, UpdateUserDto updateUserDto);
     }
 }

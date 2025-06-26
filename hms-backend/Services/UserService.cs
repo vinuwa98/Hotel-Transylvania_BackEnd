@@ -67,5 +67,22 @@ namespace HmsBackend.Services
 
             return new NotFoundObjectResult("Invalid username or password");
         }
+
+
+        public async Task<IActionResult> UpdateUserAsync(string userId, UpdateUserDto dto)
+        {
+            if (dto == null) return new BadRequestResult();
+
+            var result = await _userRepository.UpdateUserAsync(userId, dto);
+
+            if (result.Succeeded)
+            {
+                return new OkObjectResult("User updated successfully");
+            }
+            else
+            {
+                return new BadRequestObjectResult(result.Errors);
+            }
+        }
     }
 }
