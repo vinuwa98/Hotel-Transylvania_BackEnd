@@ -1,4 +1,8 @@
 using HmsBackend;
+using HmsBackend.Repositories;
+using HmsBackend.Repositories.Interfaces;
+using HmsBackend.Services;
+using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +32,9 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
