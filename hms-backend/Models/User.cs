@@ -4,7 +4,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HmsBackend.Models
 {
-    public class User : IdentityUser
+    
+    public class User :IdentityUser
     {
         //[Key]
         //public int id { get; set; }
@@ -32,8 +33,9 @@ namespace HmsBackend.Models
 
         public int? SupervisorID { get; set; }
 
-        //public List<Room> Rooms { get; set; } = new();
-        //public List<Complaint> Complaints { get; set; } = new();
+      
+        public List<Room> Rooms { get; set; } = new();
+        public List<Complaint> Complaints { get; set; } = new();
         public List<JobUser> JobUsers { get; set; } = new();
     }
 }
