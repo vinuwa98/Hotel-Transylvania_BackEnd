@@ -89,7 +89,7 @@ namespace HmsBackend.Controllers
                     var securityToken = tokenHandler.CreateToken(tokenDescriptor);
                     var token = tokenHandler.WriteToken(securityToken);
 
-                    return Ok(new { UserID = _user.Id, Token = token });
+                    return Ok(new { UserID = _user.Id, Token = token, Name = _user.UserName });
                 }
                 else
                 {
