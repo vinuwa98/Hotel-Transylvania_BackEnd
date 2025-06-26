@@ -1,31 +1,31 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace HmsBackend.DTOs
+public class UpdateUserDto
 {
-    public class UpdateUserDto
-    {
-        [Required]
-        public string FirstName { get; set; }
+    [Required]
+    public string UserId { get; set; }
 
-        public string? LastName { get; set; }
+    [Required]
+    public string FirstName { get; set; }
 
-        [Required]
-        public string Role { get; set; }
+    public string? LastName { get; set; }
 
-        [Phone]
-        public string ContactNumber { get; set; }
+    [Required]
+    public string Role { get; set; }
 
-        [DataType(DataType.Date)]
-        public DateTime DOB { get; set; }
+    [Phone]
+    public string ContactNumber { get; set; }
 
-        [Required]
-        [MinLength(6)]
-        public string Password { get; set; }
+    [DataType(DataType.Date)]
+    public DateTime DOB { get; set; }
 
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
+    [Required]
+    [MinLength(6)]
+    public string Password { get; set; }
 
-        public string Address { get; set; }
-    }
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; }
+
+    public string Address { get; set; }
 }

@@ -69,11 +69,11 @@ namespace HmsBackend.Services
         }
 
 
-        public async Task<IActionResult> UpdateUserAsync(string userId, UpdateUserDto dto)
+        public async Task<IActionResult> UpdateUserAsync(UpdateUserDto dto)
         {
             if (dto == null) return new BadRequestResult();
 
-            var result = await _userRepository.UpdateUserAsync(userId, dto);
+            var result = await _userRepository.UpdateUserAsync(dto);
 
             if (result.Succeeded)
             {
@@ -84,5 +84,6 @@ namespace HmsBackend.Services
                 return new BadRequestObjectResult(result.Errors);
             }
         }
+
     }
 }
