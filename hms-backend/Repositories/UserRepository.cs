@@ -106,7 +106,7 @@ namespace HmsBackend.Repositories
 
                 user.Email = dto.Email;
                 user.UserName = dto.Email;
-                user.PhoneNumber = dto.ContactNumber;
+                user.ContactNumber = dto.ContactNumber;
                 user.FirstName = dto.FirstName;
                 user.LastName = dto.LastName;
                 user.Address = dto.Address;
