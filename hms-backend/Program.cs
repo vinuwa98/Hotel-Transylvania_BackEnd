@@ -90,47 +90,82 @@ if (app.Environment.IsDevelopment())
 }
 */
 
-
 using HmsBackend;
+using HmsBackend.Models;
+using HmsBackend.Repositories;
+using HmsBackend.Repositories.Interfaces;
+using HmsBackend.Services;
+using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
-using System;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services
 builder.Services.AddControllers();
-builder.Services.AddSwaggerGen();
+builder.Services.AddEndpointsApiExplorer();
 
-//dsdffdf
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "HmsBackend API", Version = "v1" });
+
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Enter 'Bearer' followed by your token. Example: Bearer abc123..."
+    });
+
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") // or whatever your frontend runs on
+        policy.WithOrigins("http://localhost:5173")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
 });
 
-
-
-////
-
-
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
-
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddIdentity<User, IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
+
 builder.Services.Configure<IdentityOptions>(options =>
 {
+    options.Password.RequireDigit = false;
     options.Password.RequiredLength = 4;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
     options.Password.RequiredUniqueChars = 1;
     options.SignIn.RequireConfirmedEmail = false;
 });
@@ -139,7 +174,6 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
@@ -151,8 +185,7 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
     };
 });
 
@@ -174,10 +207,10 @@ async Task SeedRolesAndAdminAsync(IServiceProvider services)
 {
     using var scope = services.CreateScope();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-    await context.Database.EnsureDeletedAsync();
+    await context.Database.EnsureDeletedAsync(); // Optional: Remove if you want to persist data
     await context.Database.EnsureCreatedAsync();
 
     string[] roles = { "Admin", "Cleaner", "HelpDesk", "Supervisor", "MaintenanceStaff", "MaintenanceManager" };
@@ -187,31 +220,42 @@ async Task SeedRolesAndAdminAsync(IServiceProvider services)
             await roleManager.CreateAsync(new IdentityRole(role));
     }
 
-    var adminUser = new IdentityUser { UserName = "admin@hms.com", Email = "admin@hms.com", EmailConfirmed = true };
-    if (await userManager.FindByEmailAsync(adminUser.Email) == null)
+    string adminEmail = "admin@hms.com";
+    string adminPassword = "Admin@123";
+
+    if (await userManager.FindByEmailAsync(adminEmail) == null)
     {
-        await userManager.CreateAsync(adminUser, "Admin@123");
-        await userManager.AddToRoleAsync(adminUser, "Admin");
+        var adminUser = new User
+        {
+            UserName = adminEmail,
+            NormalizedUserName = adminEmail.ToUpper(),
+            Email = adminEmail,
+            NormalizedEmail = adminEmail.ToUpper(),
+            EmailConfirmed = true,
+            DOB = new DateTime(2002, 2, 2),
+            FirstName = "Admin",
+            LastName = "User"
+        };
+
+
+        var createResult = await userManager.CreateAsync(adminUser, adminPassword);
+        if (createResult.Succeeded)
+        {
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
     }
 }
 
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
-
-    app.UseSwagger();     // serves /swagger/v1/swagger.json
+    app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "HmsBackend API V1");
-        c.RoutePrefix = string.Empty; // serve swagger at root
+        c.RoutePrefix = string.Empty;
     });
 
-    using (var scope = app.Services.CreateScope())
-    {
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        context.Database.EnsureDeleted();
-        context.Database.EnsureCreated();
-    }
     await SeedRolesAndAdminAsync(app.Services);
 }
 
