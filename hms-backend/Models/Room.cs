@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using HmsBackend.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace HmsBackend.Models
 {
@@ -6,6 +7,16 @@ namespace HmsBackend.Models
     {
         [Key]
         public int RoomId { get; set; }
-        public required string RoomType {  get; set; }
+
+        [Required]
+        [MaxLength(50)]
+        public string RoomType { get; set; }
+
+        [Required]
+        public string UserId { get; set; }
+
+        public User User { get; set; }
+
+        public List<Complaint> Complaints { get; set; } = new();
     }
 }

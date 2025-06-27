@@ -5,7 +5,7 @@
 namespace hms_backend.Migrations
 {
     /// <inheritdoc />
-    public partial class AddedRoomData : Migration
+    public partial class hotel : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

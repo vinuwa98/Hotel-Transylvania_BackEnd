@@ -1,5 +1,8 @@
-﻿using HmsBackend.Models;
-using Microsoft.AspNetCore.Http;
+﻿using HmsBackend.Dto;
+using HmsBackend.DTOs;
+using HmsBackend.Services;
+using HmsBackend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -9,84 +12,56 @@ using System.Text;
 
 namespace HmsBackend.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    public class AccountController(UserManager<IdentityUser> userManager, IConfiguration configuration) : ControllerBase
+    [Route("api/[controller]")]
+    public class AccountController(IUserService userService, IConfiguration configuration) : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager = userManager;
+        private readonly IUserService _userService = userService;
         private readonly IConfiguration _configuration = configuration;
 
+        [Authorize(Policy = "AdminOnly")]
+        [Route("add-user")]
         [HttpPost]
-        [Route("register")]
-        public async Task<IActionResult> Register(User account)
+        public async Task<IActionResult> AddUser(RegistrationDto registerRequest)
         {
-            try
-            {
-                if (account == null) return BadRequest();
+            var result = await _userService.AddUserAsync(registerRequest);
 
-                var result = await _userManager.CreateAsync(new IdentityUser
-                {
-                    UserName = account.UserName,
-                    Email = account.Email
-                }, account.Password);
-
-                if (result.Succeeded)
-                {
-                    return NoContent();
-                }
-                else
-                {
-                    return StatusCode(500);
-                }
-            }
-            catch (Exception ex)
+            if (!result.Succeeded)
             {
-                Console.WriteLine(ex.StackTrace);
-                return StatusCode(500);
+                var errors = result.Errors.Select(e => e.Description).ToList();
+
+                // Optional: log the errors
+                Console.WriteLine("User creation failed: " + string.Join(", ", errors));
+
+                return BadRequest(new
+                {
+                    message = "User creation failed",
+                    errors = errors
+                });
             }
+
+            return Ok(new
+            {
+                message = "User created successfully"
+            });
         }
 
         [HttpPost]
         [Route("login")]
-        public async Task<IActionResult> Login(User user)
+        public async Task<IActionResult> Login(UserDto user)
         {
-            try
-            {
-                var _user = await _userManager.FindByNameAsync(user.UserName);
-
-                if (_user != null && await _userManager.CheckPasswordAsync(_user, user.Password))
-                {
-                    IdentityOptions identityOptions = new();
-
-                    var tokenDescriptor = new SecurityTokenDescriptor
-                    {
-                        Subject = new ClaimsIdentity(new Claim[] {
-                            new Claim("UserId", _user.Id.ToString())
-                        }),
-                        Issuer = _configuration["Jwt:Issuer"],
-                        Audience = _configuration["Jwt:Audience"],
-                        Expires = DateTime.UtcNow.AddMonths(1),
-                        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])), SecurityAlgorithms.HmacSha256Signature),
-                    };
-
-                    var tokenHandler = new JwtSecurityTokenHandler();
-                    var securityToken = tokenHandler.CreateToken(tokenDescriptor);
-                    var token = tokenHandler.WriteToken(securityToken);
-
-                    return Ok(new { UserID = _user.Id, Token = token });
-                }
-                else
-                {
-                    return NotFound("Invalid username or password");
-                }
-            }
-            catch (Exception ex)
-            {
-                {
-                    Console.WriteLine(ex.ToString());
-                    return StatusCode(500);
-                }
-            }
+            var result = await _userService.LoginAsync(user);
+            return result;
         }
+
+
+        [Authorize(Policy = "AdminOnly")]
+        [HttpPut("update-user")]
+        public async Task<IActionResult> UpdateUser(UpdateUserDto updateUserDto)
+        {
+            var result = await _userService.UpdateUserAsync(updateUserDto);
+            return result;
+        }
+
     }
 }
