@@ -16,83 +16,128 @@ namespace HmsBackend.Repositories
         public async Task<IdentityResult> AddUserAsync(RegistrationDto registerRequest)
         {
 
-            var normalizedEmail = registerRequest.Email.Trim().ToLower();
-
-            var identityUser = new User
+            try
             {
-                UserName = registerRequest.Email,
-                NormalizedUserName = registerRequest.Email.ToUpper(),
-                Email = registerRequest.Email,
-                NormalizedEmail = registerRequest.Email.ToUpper(),
-                EmailConfirmed = true,
-                FirstName = registerRequest.FirstName,
-                LastName = registerRequest.LastName,
-                DOB = registerRequest.DOB,
-                Address = registerRequest.Address,
-                ContactNumber = registerRequest.ContactNumber,
-                SupervisorID = registerRequest.SupervisorID
-            };
+                var normalizedEmail = registerRequest.Email.Trim().ToLower();
 
-            var result = await _userManager.CreateAsync(identityUser, registerRequest.Password);
+                var identityUser = new User
+                {
+                    UserName = registerRequest.Email,
+                    NormalizedUserName = registerRequest.Email.ToUpper(),
+                    Email = registerRequest.Email,
+                    NormalizedEmail = registerRequest.Email.ToUpper(),
+                    EmailConfirmed = true,
+                    FirstName = registerRequest.FirstName,
+                    LastName = registerRequest.LastName,
+                    DOB = registerRequest.DOB,
+                    Address = registerRequest.Address,
+                    ContactNumber = registerRequest.ContactNumber,
+                    SupervisorID = registerRequest.SupervisorID
+                };
 
-            if (result.Succeeded)
+                var result = await _userManager.CreateAsync(identityUser, registerRequest.Password);
+
+                if (result.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(identityUser, registerRequest.Role);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
             {
-                await _userManager.AddToRoleAsync(identityUser, registerRequest.Role);
+                Console.WriteLine(ex.Message);
+                return IdentityResult.Failed(new IdentityError { Description = "An error occurred while creating the user." });
             }
 
-            return result;
         }
 
-        public Task<User?> FindByEmailAsync(string username)
+        public async Task<User?> FindByEmailAsync(string email)
         {
-            return _userManager.FindByEmailAsync(username);
+            try
+            {
+                if (email == string.Empty || email == null)
+                {
+                    throw new Exception("Cannot find users with invalid email");
+                }
+
+                return await _userManager.FindByEmailAsync(email);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
         }
 
-        public Task<bool> CheckPasswordAsync(User user, string password)
+        public async Task<bool> CheckPasswordAsync(User user, string password)
         {
-            return _userManager.CheckPasswordAsync(user, password);
+            try
+            {
+                return await _userManager.CheckPasswordAsync(user, password);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
         }
 
-        public Task<IList<string>> GetRolesAsync(User user)
+        public async Task<IList<string>> GetRolesAsync(User user)
         {
-            return _userManager.GetRolesAsync(user);
+            try
+            {
+                return await _userManager.GetRolesAsync(user);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return new List<string>();
+            }
         }
 
         public async Task<IdentityResult> UpdateUserAsync(UpdateUserDto dto)
         {
-            var user = await _userManager.FindByIdAsync(dto.UserId);
-            if (user == null)
-                return IdentityResult.Failed(new IdentityError { Description = "User not found" });
-
-            user.Email = dto.Email;
-            user.UserName = dto.Email;
-            user.PhoneNumber = dto.ContactNumber;
-            user.FirstName = dto.FirstName;
-            user.LastName = dto.LastName;
-            user.Address = dto.Address;
-            user.DOB = dto.DOB;
-
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var passwordResult = await _userManager.ResetPasswordAsync(user, token, dto.Password);
-            if (!passwordResult.Succeeded)
-                return passwordResult;
-
-            var currentRoles = await _userManager.GetRolesAsync(user);
-            if (!currentRoles.Contains(dto.Role))
+            try
             {
-                var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
-                if (!removeResult.Succeeded)
-                    return removeResult;
+                var user = await _userManager.FindByIdAsync(dto.UserId);
+                if (user == null)
+                    return IdentityResult.Failed(new IdentityError { Description = "User not found" });
 
-                var addRoleResult = await _userManager.AddToRoleAsync(user, dto.Role);
-                if (!addRoleResult.Succeeded)
-                    return addRoleResult;
+                user.Email = dto.Email;
+                user.UserName = dto.Email;
+                user.PhoneNumber = dto.ContactNumber;
+                user.FirstName = dto.FirstName;
+                user.LastName = dto.LastName;
+                user.Address = dto.Address;
+                user.DOB = dto.DOB;
+
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var passwordResult = await _userManager.ResetPasswordAsync(user, token, dto.Password);
+                if (!passwordResult.Succeeded)
+                    return passwordResult;
+
+                var currentRoles = await _userManager.GetRolesAsync(user);
+                if (!currentRoles.Contains(dto.Role))
+                {
+                    var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                    if (!removeResult.Succeeded)
+                        return removeResult;
+
+                    var addRoleResult = await _userManager.AddToRoleAsync(user, dto.Role);
+                    if (!addRoleResult.Succeeded)
+                        return addRoleResult;
+                }
+
+                return await _userManager.UpdateAsync(user);
             }
-
-            
-
-            return await _userManager.UpdateAsync(user);
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return IdentityResult.Failed(new IdentityError { Description = "An error occurred while updating the user." });
+            }
         }
+
 
 
 

@@ -18,16 +18,25 @@ namespace HmsBackend.Services
 
         public async Task<IdentityResult> AddUserAsync(RegistrationDto registerRequest)
         {
-            if (registerRequest == null)
+            try
             {
-                // You cannot return BadRequestResult here, since return type is IdentityResult
-                // Instead, return a failed IdentityResult with an error message
-                return IdentityResult.Failed(new IdentityError { Description = "RegisterRequest cannot be null" });
+                if (registerRequest == null)
+                {
+                    // You cannot return BadRequestResult here, since return type is IdentityResult
+                    // Instead, return a failed IdentityResult with an error message
+                    return IdentityResult.Failed(new IdentityError { Description = "RegisterRequest cannot be null" });
+                }
+
+                var result = await _userRepository.AddUserAsync(registerRequest);
+
+                return result;  // Just return 
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return IdentityResult.Failed(new IdentityError { Description = "An unexpected error occurred while adding the user." });
 
-            var result = await _userRepository.AddUserAsync(registerRequest);
-
-            return result;  // Just return IdentityResult from repo as-is
+            }
         }
 
 
@@ -74,75 +83,91 @@ namespace HmsBackend.Services
         */
         public async Task<IActionResult> LoginAsync(UserDto user)
         {
-            Console.WriteLine($"Login Attempt: {user.Email}");
-            Console.WriteLine($"Input Password: {user.Password}");
-
-            var identityUser = await _userRepository.FindByEmailAsync(user.Email.Trim());
-
-
-
-            if (identityUser != null)
+            try
             {
-                Console.WriteLine($"Found User: {identityUser.Email}");
+                var identityUser = await _userRepository.FindByEmailAsync(user.Email.Trim());
 
-                var passwordCorrect = await _userRepository.CheckPasswordAsync(identityUser, user.Password);
-                Console.WriteLine($"Password Correct: {passwordCorrect}");
 
-                if (passwordCorrect)
+
+                if (identityUser != null)
                 {
-                    var roles = await _userRepository.GetRolesAsync(identityUser);
+                    Console.WriteLine($"Found User: {identityUser.Email}");
 
-                    var claims = new List<Claim>
+                    var passwordCorrect = await _userRepository.CheckPasswordAsync(identityUser, user.Password);
+                    Console.WriteLine($"Password Correct: {passwordCorrect}");
+
+                    if (passwordCorrect)
+                    {
+                        var roles = await _userRepository.GetRolesAsync(identityUser);
+
+                        var claims = new List<Claim>
             {
                 new Claim("UserId", identityUser.Id.ToString())
             };
 
-                    foreach (var role in roles)
-                    {
-                        claims.Add(new Claim(ClaimTypes.Role, role));
+                        foreach (var role in roles)
+                        {
+                            claims.Add(new Claim(ClaimTypes.Role, role));
+                        }
+
+                        var tokenDescriptor = new SecurityTokenDescriptor
+                        {
+                            Subject = new ClaimsIdentity(claims),
+                            Issuer = _configuration["Jwt:Issuer"],
+                            Audience = _configuration["Jwt:Audience"],
+                            Expires = DateTime.UtcNow.AddMonths(1),
+                            SigningCredentials = new SigningCredentials(
+                                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])),
+                                SecurityAlgorithms.HmacSha256Signature
+                            ),
+                        };
+
+                        var tokenHandler = new JwtSecurityTokenHandler();
+                        var token = tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
+
+                        Console.WriteLine($"Login Success: Token generated for {identityUser.Email}");
+                        return new OkObjectResult(new { UserID = identityUser.Id, Token = token });
                     }
-
-                    var tokenDescriptor = new SecurityTokenDescriptor
-                    {
-                        Subject = new ClaimsIdentity(claims),
-                        Issuer = _configuration["Jwt:Issuer"],
-                        Audience = _configuration["Jwt:Audience"],
-                        Expires = DateTime.UtcNow.AddMonths(1),
-                        SigningCredentials = new SigningCredentials(
-                            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])),
-                            SecurityAlgorithms.HmacSha256Signature
-                        ),
-                    };
-
-                    var tokenHandler = new JwtSecurityTokenHandler();
-                    var token = tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
-
-                    Console.WriteLine($"Login Success: Token generated for {identityUser.Email}");
-                    return new OkObjectResult(new { UserID = identityUser.Id, Token = token });
                 }
+
+                Console.WriteLine("Login Failed: Invalid email or password");
+                return new NotFoundObjectResult("Invalid username or password");
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return new StatusCodeResult(500);
             }
 
-            Console.WriteLine("Login Failed: Invalid email or password");
-            return new NotFoundObjectResult("Invalid username or password");
         }
 
 
 
         public async Task<IActionResult> UpdateUserAsync(UpdateUserDto dto)
         {
-            if (dto == null) return new BadRequestResult();
-
-            var result = await _userRepository.UpdateUserAsync(dto);
-
-            if (result.Succeeded)
+            try
             {
-                return new OkObjectResult("User updated successfully");
+                if (dto == null) return new BadRequestResult();
+
+                var result = await _userRepository.UpdateUserAsync(dto);
+
+                if (result.Succeeded)
+                {
+                    return new OkObjectResult("User updated successfully");
+                }
+                else
+                {
+                    return new BadRequestObjectResult(result.Errors);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return new BadRequestObjectResult(result.Errors);
+                Console.WriteLine(ex.Message);
+                return new StatusCodeResult(500); // Internal Server Error
             }
         }
+
 
     }
 }
