@@ -25,7 +25,25 @@ namespace HmsBackend.Controllers
         public async Task<IActionResult> AddUser(RegistrationDto registerRequest)
         {
             var result = await _userService.AddUserAsync(registerRequest);
-            return result;
+
+            if (!result.Succeeded)
+            {
+                var errors = result.Errors.Select(e => e.Description).ToList();
+
+                // Optional: log the errors
+                Console.WriteLine("User creation failed: " + string.Join(", ", errors));
+
+                return BadRequest(new
+                {
+                    message = "User creation failed",
+                    errors = errors
+                });
+            }
+
+            return Ok(new
+            {
+                message = "User created successfully"
+            });
         }
 
         [HttpPost]
