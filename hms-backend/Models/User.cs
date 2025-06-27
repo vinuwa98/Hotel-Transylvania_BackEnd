@@ -11,9 +11,8 @@ namespace HmsBackend.Models
 
         public string? LastName { get; set; }
 
-        [Required]
         [DataType(DataType.Date)]
-        public DateTime DOB { get; set; }
+        public DateTime? DOB { get; set; }
 
         [MaxLength(250)]
         public string? Address { get; set; }
