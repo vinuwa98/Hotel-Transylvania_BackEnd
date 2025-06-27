@@ -1,23 +1,16 @@
 using HmsBackend.Dto;
 using HmsBackend.DTOs;
-using HmsBackend.Services;
 using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
 namespace HmsBackend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AccountController(IUserService userService, IConfiguration configuration) : ControllerBase
+    public class AccountController(IUserService userService) : ControllerBase
     {
         private readonly IUserService _userService = userService;
-        private readonly IConfiguration _configuration = configuration;
 
         [Authorize(Policy = "AdminOnly")]
         [Route("add-user")]

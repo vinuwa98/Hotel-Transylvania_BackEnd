@@ -17,55 +17,65 @@ namespace HmsBackend.Services
 
         public async Task<IActionResult> AddUserAsync(RegistrationDto registerRequest)
         {
-            if (registerRequest == null) return new BadRequestResult();
-
-            var result = await _userRepository.AddUserAsync(registerRequest);
-
-            if (result.Succeeded)
+            try
             {
-                return new OkObjectResult("Successfully added the user");
-            }
+                if (registerRequest == null)
+                    return new BadRequestResult();
 
-            return new StatusCodeResult(500);
+                var result = await _userRepository.AddUserAsync(registerRequest);
+
+                if (result.Succeeded)
+                    return new OkObjectResult("Successfully added the user");
+
+                return new StatusCodeResult(500);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return new StatusCodeResult(500);
+            }
         }
 
         public async Task<IActionResult> LoginAsync(UserDto user)
         {
-            var identityUser = await _userRepository.FindByEmailAsync(user.Email);
-
-            if (identityUser != null && await _userRepository.CheckPasswordAsync(identityUser, user.Password))
+            try
             {
-                var roles = await _userRepository.GetRolesAsync(identityUser);
+                var identityUser = await _userRepository.FindByEmailAsync(user.Email);
 
-                var claims = new List<Claim>
-            {
-                new Claim("UserId", identityUser.Id.ToString())
-            };
-
-                foreach (var role in roles)
+                if (identityUser != null && await _userRepository.CheckPasswordAsync(identityUser, user.Password))
                 {
-                    claims.Add(new Claim(ClaimTypes.Role, role));
+                    var roles = await _userRepository.GetRolesAsync(identityUser);
+
+                    var claims = new List<Claim> { new Claim("UserId", identityUser.Id.ToString()) };
+
+                    foreach (var role in roles)
+                        claims.Add(new Claim(ClaimTypes.Role, role));
+
+                    var tokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = new ClaimsIdentity(claims),
+                        Issuer = _configuration["Jwt:Issuer"],
+                        Audience = _configuration["Jwt:Audience"],
+                        Expires = DateTime.UtcNow.AddMonths(1),
+                        SigningCredentials = new SigningCredentials(
+                            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])),
+                            SecurityAlgorithms.HmacSha256Signature
+                        ),
+                    };
+
+                    var tokenHandler = new JwtSecurityTokenHandler();
+                    var token = tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
+
+                    return new OkObjectResult(new { UserID = identityUser.Id, Token = token });
                 }
 
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = new ClaimsIdentity(claims),
-                    Issuer = _configuration["Jwt:Issuer"],
-                    Audience = _configuration["Jwt:Audience"],
-                    Expires = DateTime.UtcNow.AddMonths(1),
-                    SigningCredentials = new SigningCredentials(
-                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])),
-                        SecurityAlgorithms.HmacSha256Signature
-                    ),
-                };
-
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var token = tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
-
-                return new OkObjectResult(new { UserID = identityUser.Id, Token = token });
+                return new NotFoundObjectResult("Invalid username or password");
             }
-
-            return new NotFoundObjectResult("Invalid username or password");
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return new StatusCodeResult(500);
+            }
         }
     }
 }

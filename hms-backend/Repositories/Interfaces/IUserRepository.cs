@@ -1,4 +1,5 @@
 ﻿using HmsBackend.DTOs;
+using HmsBackend.Models;
 using Microsoft.AspNetCore.Identity;
 
 namespace HmsBackend.Repositories.Interfaces
@@ -6,8 +7,9 @@ namespace HmsBackend.Repositories.Interfaces
     public interface IUserRepository
     {
         Task<IdentityResult> AddUserAsync(RegistrationDto registerRequest);
-        Task<IdentityUser?> FindByEmailAsync(string username);
-        Task<bool> CheckPasswordAsync(IdentityUser user, string password);
-        Task<IList<string>> GetRolesAsync(IdentityUser user);
+        Task<User?> FindByEmailAsync(string username);
+        Task<bool> CheckPasswordAsync(User user, string password);
+        Task<IList<string>> GetRolesAsync(User user);
+
     }
 }
