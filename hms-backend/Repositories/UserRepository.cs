@@ -1,4 +1,5 @@
-﻿using HmsBackend.DTOs;
+﻿using hms_backend.DTOs;
+using HmsBackend.DTOs;
 using HmsBackend.Models;
 using HmsBackend.Repositories.Interfaces;
 using Microsoft.AspNetCore.Identity;
@@ -98,46 +99,103 @@ namespace HmsBackend.Repositories
 
         public async Task<IdentityResult> UpdateUserAsync(UpdateUserDto dto)
         {
+            var user = await _userManager.FindByIdAsync(dto.UserId);
+            if (user == null)
+                return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+
+            user.Email = dto.Email;
+            user.UserName = dto.Email;
+            user.PhoneNumber = dto.ContactNumber;
+            user.FirstName = dto.FirstName;
+            user.LastName = dto.LastName;
+            user.Address = dto.Address;
+            user.DOB = dto.DOB;
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var passwordResult = await _userManager.ResetPasswordAsync(user, token, dto.Password);
+            if (!passwordResult.Succeeded)
+                return passwordResult;
+
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            if (!currentRoles.Contains(dto.Role))
+            {
+                var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                if (!removeResult.Succeeded)
+                    return removeResult;
+
+                var addRoleResult = await _userManager.AddToRoleAsync(user, dto.Role);
+                if (!addRoleResult.Succeeded)
+                    return addRoleResult;
+            }
+
+
+
+            return await _userManager.UpdateAsync(user);
+        }
+
+
+
+        public async Task<List<ViewUserDto>> GetAllUsersAsync()
+        {
             try
             {
-                var user = await _userManager.FindByIdAsync(dto.UserId);
-                if (user == null)
-                    return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+                var users = _userManager.Users.ToList();
+                var userList = new List<ViewUserDto>();
 
-                user.Email = dto.Email;
-                user.UserName = dto.Email;
-                user.ContactNumber = dto.ContactNumber;
-                user.FirstName = dto.FirstName;
-                user.LastName = dto.LastName;
-                user.Address = dto.Address;
-                user.DOB = dto.DOB;
-
-                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var passwordResult = await _userManager.ResetPasswordAsync(user, token, dto.Password);
-                if (!passwordResult.Succeeded)
-                    return passwordResult;
-
-                var currentRoles = await _userManager.GetRolesAsync(user);
-                if (!currentRoles.Contains(dto.Role))
+                foreach (var user in users)
                 {
-                    var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
-                    if (!removeResult.Succeeded)
-                        return removeResult;
+                    var roles = await _userManager.GetRolesAsync(user);
 
-                    var addRoleResult = await _userManager.AddToRoleAsync(user, dto.Role);
-                    if (!addRoleResult.Succeeded)
-                        return addRoleResult;
+                    userList.Add(new ViewUserDto
+                    {
+                        UserId = user.Id,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Email = user.Email,
+                        Address = user.Address,
+                        ContactNumber = user.ContactNumber,
+                        DOB = (DateTime)user.DOB,
+                        Role = roles.FirstOrDefault() ?? "N/A"
+                    });
                 }
 
-                return await _userManager.UpdateAsync(user);
+                return userList;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return IdentityResult.Failed(new IdentityError { Description = "An error occurred while updating the user." });
+                return new List<ViewUserDto>();
             }
         }
 
+        public async Task<ViewUserDto?> ViewUserAsync(string userId)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                    return null;
+
+                var roles = await _userManager.GetRolesAsync(user);
+
+                return new ViewUserDto
+                {
+                    UserId = user.Id,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Email = user.Email,
+                    Address = user.Address,
+                    ContactNumber = user.ContactNumber,
+                    DOB = (DateTime)user.DOB,
+                    Role = roles.FirstOrDefault() ?? "N/A"
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
 
 
 

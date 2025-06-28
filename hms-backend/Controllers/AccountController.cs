@@ -1,4 +1,5 @@
-﻿using HmsBackend.Dto;
+﻿using hms_backend.DTOs;
+using HmsBackend.Dto;
 using HmsBackend.DTOs;
 using HmsBackend.Services;
 using HmsBackend.Services.Interfaces;
@@ -55,6 +56,7 @@ namespace HmsBackend.Controllers
         }
 
 
+
         [Authorize(Policy = "AdminOnly")]
         [HttpPut("update-user")]
         public async Task<IActionResult> UpdateUser(UpdateUserDto updateUserDto)
@@ -62,6 +64,25 @@ namespace HmsBackend.Controllers
             var result = await _userService.UpdateUserAsync(updateUserDto);
             return result;
         }
+
+
+        [HttpGet("all-users")]
+        public async Task<IActionResult> GetAllUsersAsync()
+        {
+            try
+            {
+                var result = await _userService.GetAllUsersAsync();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error in GetAllUsersAsync: " + ex.Message);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+
+
 
     }
 }

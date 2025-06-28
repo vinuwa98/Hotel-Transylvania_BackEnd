@@ -1,4 +1,5 @@
-﻿using HmsBackend.Dto;
+﻿using hms_backend.DTOs;
+using HmsBackend.Dto;
 using HmsBackend.DTOs;
 using HmsBackend.Repositories.Interfaces;
 using HmsBackend.Services.Interfaces;
@@ -39,48 +40,6 @@ namespace HmsBackend.Services
             }
         }
 
-
-        /*
-
-        public async Task<IActionResult> LoginAsync(UserDto user)
-        {
-            var identityUser = await _userRepository.FindByEmailAsync(user.Email);
-
-            if (identityUser != null && await _userRepository.CheckPasswordAsync(identityUser, user.Password))
-            {
-                var roles = await _userRepository.GetRolesAsync(identityUser);
-
-                var claims = new List<Claim>
-            {
-                new Claim("UserId", identityUser.Id.ToString())
-            };
-
-                foreach (var role in roles)
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, role));
-                }
-
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = new ClaimsIdentity(claims),
-                    Issuer = _configuration["Jwt:Issuer"],
-                    Audience = _configuration["Jwt:Audience"],
-                    Expires = DateTime.UtcNow.AddMonths(1),
-                    SigningCredentials = new SigningCredentials(
-                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])),
-                        SecurityAlgorithms.HmacSha256Signature
-                    ),
-                };
-
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var token = tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
-
-                return new OkObjectResult(new { UserID = identityUser.Id, Token = token });
-            }
-
-            return new NotFoundObjectResult("Invalid username or password");
-        }
-        */
         public async Task<IActionResult> LoginAsync(UserDto user)
         {
             try
@@ -142,31 +101,44 @@ namespace HmsBackend.Services
 
         }
 
-
-
         public async Task<IActionResult> UpdateUserAsync(UpdateUserDto dto)
+        {
+            if (dto == null) return new BadRequestResult();
+
+            var result = await _userRepository.UpdateUserAsync(dto);
+
+            if (result.Succeeded)
+            {
+                return new OkObjectResult("User updated successfully");
+            }
+            else
+            {
+                return new BadRequestObjectResult(result.Errors);
+            }
+        }
+
+
+
+
+
+        public async Task<IActionResult> GetAllUsersAsync()
         {
             try
             {
-                if (dto == null) return new BadRequestResult();
+                var users = await _userRepository.GetAllUsersAsync();
 
-                var result = await _userRepository.UpdateUserAsync(dto);
+                if (users == null || users.Count == 0)
+                    return new NotFoundObjectResult("No users found");
 
-                if (result.Succeeded)
-                {
-                    return new OkObjectResult("User updated successfully");
-                }
-                else
-                {
-                    return new BadRequestObjectResult(result.Errors);
-                }
+                return new OkObjectResult(users);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return new StatusCodeResult(500); // Internal Server Error
+                return new StatusCodeResult(500);
             }
         }
+
 
 
     }

@@ -1,6 +1,8 @@
-﻿using HmsBackend.DTOs;
+﻿using hms_backend.DTOs;
+using HmsBackend.DTOs;
 using HmsBackend.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HmsBackend.Repositories.Interfaces
 {
@@ -12,6 +14,11 @@ namespace HmsBackend.Repositories.Interfaces
         Task<IList<string>> GetRolesAsync(User user);
 
         Task<IdentityResult> UpdateUserAsync(UpdateUserDto updateDto);
+
+
+        Task<List<ViewUserDto>> GetAllUsersAsync();
+
+        Task<ViewUserDto?> ViewUserAsync(string userId);
 
     }
 }
