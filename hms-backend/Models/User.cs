@@ -7,11 +7,13 @@ namespace HmsBackend.Models
     
     public class User :IdentityUser
     {
-        
+        internal string FullName;
+        internal string Status;
+
         //public int id { get; set; }
 
-      // limit to 50 characters
-        
+        // limit to 50 characters
+
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
 

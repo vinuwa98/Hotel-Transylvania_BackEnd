@@ -1,9 +1,12 @@
-﻿using HmsBackend.DTOs;
+﻿using hms_backend.DTOs;
+using HmsBackend.Dto;
+using HmsBackend.DTOs;
 using HmsBackend.Models;
 using HmsBackend.Repositories.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Net;
 
@@ -138,7 +141,38 @@ namespace HmsBackend.Repositories
             }
         }
 
+        public async Task<List<UserViewDto>> GetAllUsersAsync()
+        {
+            try
+            {
+                var users = await _userManager.Users.ToListAsync();
+                var nonAdminUsers = new List<UserViewDto>();
 
+                foreach (var user in users)
+                {
+                    var roles = await _userManager.GetRolesAsync(user);
+                    if (!roles.Contains("Admin"))
+                    {
+                        nonAdminUsers.Add(new UserViewDto
+                        {
+                            FullName = (user.FirstName + " " + user.LastName).Trim(),
+                            DOB = user.DOB,
+                            Address = user.Address,
+                            ContactNumber = user.ContactNumber,
+                            Status = user.EmailConfirmed ? "Active" : "Inactive"
+                        });
+                    }  
+                }
+
+                return nonAdminUsers;
+               
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return new List<UserViewDto>();
+            }
+        }
 
 
     }

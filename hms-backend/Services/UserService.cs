@@ -1,5 +1,7 @@
-﻿using HmsBackend.Dto;
+﻿using hms_backend.DTOs;
+using HmsBackend.Dto;
 using HmsBackend.DTOs;
+using HmsBackend.Models;
 using HmsBackend.Repositories.Interfaces;
 using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
@@ -168,6 +170,11 @@ namespace HmsBackend.Services
             }
         }
 
+        // fetch all the users from the repository
+        public async Task<List<UserViewDto>> GetAllUsersAsync()
+        {
+            return await _userRepository.GetAllUsersAsync();
+        }
 
     }
 }

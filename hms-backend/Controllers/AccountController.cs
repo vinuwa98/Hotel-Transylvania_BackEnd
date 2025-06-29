@@ -63,5 +63,12 @@ namespace HmsBackend.Controllers
             return result;
         }
 
+        [Authorize(Policy = "AdminOnly")]
+        [HttpGet("get-users")]
+        public async Task<IActionResult> GetUsers()
+        {
+            var users = await _userService.GetAllUsersAsync();
+            return Ok(users);
+        }
     }
 }
