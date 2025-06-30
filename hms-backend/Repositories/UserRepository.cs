@@ -155,8 +155,9 @@ namespace HmsBackend.Repositories
                     {
                         nonAdminUsers.Add(new UserViewDto
                         {
+                            //Id = user.Id,
                             FullName = (user.FirstName + " " + user.LastName).Trim(),
-                            DOB = user.DOB,
+                            Role = roles.FirstOrDefault() ?? "N/A",
                             Address = user.Address,
                             ContactNumber = user.ContactNumber,
                             Status = user.EmailConfirmed ? "Active" : "Inactive"
