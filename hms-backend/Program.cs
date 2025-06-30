@@ -108,6 +108,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddScoped<IUserCountRepository, UserCountRepository>();
+builder.Services.AddScoped<IUserCountService, UserCountService>();
+
 
 builder.Services.AddSwaggerGen(c =>
 {
