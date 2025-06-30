@@ -27,7 +27,7 @@ namespace HmsBackend.Services
                 if (result.Succeeded)
                     return new OkObjectResult("Successfully added the user");
 
-                return new StatusCodeResult(500);
+                return new BadRequestObjectResult("User creation failed!");
             }
             catch (Exception ex)
             {
