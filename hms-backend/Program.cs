@@ -90,8 +90,8 @@ if (app.Environment.IsDevelopment())
 }
 */
 
-using hms_backend.Services;
-using hms_backend.Services.Interfaces;
+using HmsBackend.Services;
+using HmsBackend.Services.Interfaces;
 using HmsBackend;
 using HmsBackend.Models;
 using HmsBackend.Repositories;

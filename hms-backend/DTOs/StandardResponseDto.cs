@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace hms_backend.DTOs
+namespace HmsBackend.DTOs
 {
     public class StandardResponseDto<T> : ObjectResult
     {

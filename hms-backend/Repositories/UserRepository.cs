@@ -1,5 +1,5 @@
-﻿using hms_backend.DTOs;
-using HmsBackend.Dto;
+﻿using HmsBackend.DTOs;
+using HmsBackend.DTOs;
 using HmsBackend.DTOs;
 using HmsBackend.Models;
 using HmsBackend.Repositories.Interfaces;

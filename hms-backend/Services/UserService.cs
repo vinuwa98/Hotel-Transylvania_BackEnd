@@ -1,6 +1,4 @@
-﻿using hms_backend.DTOs;
-using HmsBackend.Dto;
-using HmsBackend.DTOs;
+﻿using HmsBackend.DTOs;
 using HmsBackend.Models;
 using HmsBackend.Repositories.Interfaces;
 using HmsBackend.Services.Interfaces;
@@ -16,25 +14,41 @@ namespace HmsBackend.Services
     public class UserService(UserManager<User> userManager, IUserRepository userRepository, IConfiguration configuration) : IUserService
     {
         private readonly IConfiguration _configuration = configuration;
-        private readonly IUserRepository _userRepository = userRepository;
+        private readonly IUserRepository _userRepository = userRepository; // TODO: remove this
 
         private readonly UserManager<User> _userManager = userManager;
 
-        public async Task<StandardResponseDto<List<User>>> AddUserAsync(RegistrationDto registerRequest)
+        public async Task<DataTransferObject<LoginSuccessDto>> LoginAsync(UserDto user)
         {
             try
             {
-                if (registerRequest == null)
+                var identityUser = await FindByEmailAsync(user.Email.Trim());
+
+                if (identityUser != null)
                 {
-                    return new StandardResponseDto<List<User>>(StatusCodes.Status400BadRequest, "Registration request cannot be null", null);
+                    var passwordCorrect = await CheckPasswordAsync(identityUser, user.Password);
+
+                    if (passwordCorrect)
+                    {
+                        var userWithRoles = await AssignRoles(identityUser);
+
+                        return new DataTransferObject<LoginSuccessDto> { Message = "Login Successful", Data = userWithRoles };
+                    }
                 }
 
-                if (await _userManager.FindByEmailAsync(registerRequest.Email) != null)
-                {
-                    return new StandardResponseDto<List<User>>(StatusCodes.Status400BadRequest, "You can't create more than one user with the same username",null);
-                }
+                return new DataTransferObject<LoginSuccessDto> { Message = $"Cannot find a user with email '{user.Email}'", Data = null };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return new DataTransferObject<LoginSuccessDto> { Message = "Login failed", Data = null };
+            }
+        }
 
-                //var result = await _userRepository.AddUserAsync(registerRequest);
+        public async Task<DataTransferObject<List<User>>> AddUserAsync(RegistrationDto registerRequest)
+        {
+            try
+            {
                 var newUser = CreateNewUser(registerRequest);
 
                 var result = await _userManager.CreateAsync(newUser, registerRequest.Password);
@@ -46,66 +60,13 @@ namespace HmsBackend.Services
 
                 var users = _userManager.Users.ToList().Where(u => u.Role != "Admin").ToList();
 
-                return new StandardResponseDto<List<User>>(StatusCodes.Status200OK, "User added successfully", users);
+                return new DataTransferObject<List<User>> { Message = "User added successfully", Data = users };
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return new StandardResponseDto<List<User>>(StatusCodes.Status500InternalServerError, "User not added!", null);
-            }
-        }
 
-        public async Task<StandardResponseDto<LoginSuccessDto>> LoginAsync(UserDto user)
-        {
-            try
-            {
-                var identityUser = await _userRepository.FindByEmailAsync(user.Email.Trim());
-
-                if (identityUser != null)
-                {
-                    var passwordCorrect = await _userRepository.CheckPasswordAsync(identityUser, user.Password);
-
-                    if (passwordCorrect)
-                    {
-                        var roles = await _userRepository.GetRolesAsync(identityUser);
-
-                        var claims = new List<Claim>
-                        {
-                            new Claim("UserId", identityUser.Id.ToString())
-                        };
-
-                        foreach (var role in roles)
-                        {
-                            claims.Add(new Claim(ClaimTypes.Role, role));
-                        }
-
-                        var tokenDescriptor = new SecurityTokenDescriptor
-                        {
-                            Subject = new ClaimsIdentity(claims),
-                            Issuer = _configuration["Jwt:Issuer"],
-                            Audience = _configuration["Jwt:Audience"],
-                            Expires = DateTime.UtcNow.AddMonths(1),
-                            SigningCredentials = new SigningCredentials(
-                                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])),
-                                SecurityAlgorithms.HmacSha256Signature
-                            ),
-                        };
-
-                        var tokenHandler = new JwtSecurityTokenHandler();
-                        var token = tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
-
-                        var result = new LoginSuccessDto { Token = token, UserId = identityUser.Id };
-
-                        return new StandardResponseDto<LoginSuccessDto>(StatusCodes.Status200OK, "Login successful", result);
-                    }
-                }
-
-                return new StandardResponseDto<LoginSuccessDto>(StatusCodes.Status500InternalServerError, $"Cannot find a user with email '{user.Email}'", null);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return new StandardResponseDto<LoginSuccessDto>(StatusCodes.Status500InternalServerError, "Login failed", null);
+                return new DataTransferObject<List<User>> { Message = "User addition failed", Data = null };
             }
         }
 
@@ -136,6 +97,78 @@ namespace HmsBackend.Services
         public async Task<List<UserViewDto>> GetAllUsersAsync()
         {
             return await _userRepository.GetAllUsersAsync();
+        }
+
+        public async Task<bool> IsUserAlreadyExists(string email)
+        {
+            var existingUser = await _userManager.FindByEmailAsync(email);
+
+            return existingUser != null;
+        }
+
+        public async Task<User?> FindByEmailAsync(string email)
+        {
+            try
+            {
+                if (email == string.Empty || email == null)
+                {
+                    throw new Exception("Cannot find users with invalid email");
+                }
+
+                return await _userManager.FindByEmailAsync(email);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+
+        public async Task<bool> CheckPasswordAsync(User user, string password)
+        {
+            try
+            {
+                return await _userManager.CheckPasswordAsync(user, password);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+        }
+
+        private async Task<LoginSuccessDto> AssignRoles(User identityUser)
+        {
+            var roles = await _userRepository.GetRolesAsync(identityUser);
+
+            var claims = new List<Claim>
+                            {
+                                new Claim("UserId", identityUser.Id.ToString())
+                            };
+
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Issuer = _configuration["Jwt:Issuer"],
+                Audience = _configuration["Jwt:Audience"],
+                Expires = DateTime.UtcNow.AddMonths(1),
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])),
+                    SecurityAlgorithms.HmacSha256Signature
+                ),
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
+
+            var result = new LoginSuccessDto { Token = token, UserId = identityUser.Id };
+
+            return result;
         }
 
         private User CreateNewUser(RegistrationDto registerRequest)

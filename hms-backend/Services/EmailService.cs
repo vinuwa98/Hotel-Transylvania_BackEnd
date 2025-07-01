@@ -1,8 +1,8 @@
-﻿using hms_backend.Services.Interfaces;
+﻿using HmsBackend.Services.Interfaces;
 using System.Net;
 using System.Net.Mail;
 
-namespace hms_backend.Services
+namespace HmsBackend.Services
 {
     public class EmailService(IConfiguration config) : IEmailService
     {

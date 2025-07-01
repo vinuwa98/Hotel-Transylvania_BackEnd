@@ -1,4 +1,4 @@
-﻿using HmsBackend.Dto;
+﻿using HmsBackend.DTOs;
 using System.ComponentModel.DataAnnotations;
 using Swashbuckle.AspNetCore.Filters;
 
