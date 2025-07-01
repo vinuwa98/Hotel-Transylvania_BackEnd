@@ -176,15 +176,11 @@ namespace HmsBackend.Services
             return await _userRepository.GetAllUsersAsync();
         }
 
-        //public async Task<User?> FindUserByIdAsync(string userId)
-        //{
-        //    return await _userRepository.FindUserByIdAsync(userId);
-        //}
+        public async Task<bool> DeactivateUserAsync(string userId)
+        {
+            return await _userRepository.DeactivateUserAsync(userId);
+        }
 
-        //public async Task<IdentityResult> UpdateUserStatusAsync(User user)
-        //{
-        //    return await _userRepository.UpdateUserStatusAsync(user);
-        //}
 
     }
 }

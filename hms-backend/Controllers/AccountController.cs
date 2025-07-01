@@ -71,25 +71,18 @@ namespace HmsBackend.Controllers
             return Ok(users);
         }
 
-        //[Authorize(Policy = "AdminOnly")]
-        //[HttpPut("toggle-user-status/{id}")]
-        //public async Task<IActionResult> ToggleUserStatus(string id)
-        //{
-        //    var user = await _userService.FindUserByIdAsync(id);
-        //    if (user == null)
-        //        return NotFound("User not found");
+        [Authorize(Policy = "AdminOnly")]
+        [HttpPut("deactivate-user/{userId}")]
+        public async Task<IActionResult> DeactivateUser(string userId)
+        {
+            var success = await _userService.DeactivateUserAsync(userId);
+            if (!success)
+                return NotFound(new { message = "User not found or could not be deactivated" });
 
-        //    user.EmailConfirmed = !user.EmailConfirmed; // toggle Active/Inactive
-        //    var result = await _userService.UpdateUserStatusAsync(user);
+            return Ok(new { message = "User deactivated successfully" });
+        }
 
-        //    if (result.Succeeded)
-        //    {
-        //        var status = user.EmailConfirmed ? "activated" : "deactivated";
-        //        return Ok($"User has been {status}.");
-        //    }
 
-        //    return BadRequest("Failed to update user status.");
-        //}
 
 
     }

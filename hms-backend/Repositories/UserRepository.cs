@@ -9,12 +9,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Net;
+using System.Linq;
 
 namespace HmsBackend.Repositories
 {
-    public class UserRepository(UserManager<User> userManager) : IUserRepository
+    public class UserRepository(UserManager<User> userManager, AppDbContext appDbContext) : IUserRepository
     {
         private readonly UserManager<User> _userManager = userManager;
+        private readonly AppDbContext _context = appDbContext;
 
         public async Task<IdentityResult> AddUserAsync(RegistrationDto registerRequest)
         {
@@ -145,34 +147,46 @@ namespace HmsBackend.Repositories
         {
             try
             {
-                var users = await _userManager.Users.ToListAsync();
-                var nonAdminUsers = new List<UserViewDto>();
+                // Get the Admin Role ID
+                var adminRoleId = await _context.Roles
+                    .Where(r => r.Name == "Admin")
+                    .Select(r => r.Id)
+                    .FirstOrDefaultAsync();
 
-                foreach (var user in users)
-                {
-                    var roles = await _userManager.GetRolesAsync(user);
-                    if (!roles.Contains("Admin"))
+                // Fetch non-admin users using joins
+                var users = await (
+                    from user in _context.Users
+                    join userRole in _context.UserRoles on user.Id equals userRole.UserId
+                    join role in _context.Roles on userRole.RoleId equals role.Id
+                    where userRole.RoleId != adminRoleId
+                    select new UserViewDto
                     {
-                        nonAdminUsers.Add(new UserViewDto
-                        {
-                            //Id = user.Id,
-                            FullName = (user.FirstName + " " + user.LastName).Trim(),
-                            Role = roles.FirstOrDefault() ?? "N/A",
-                            Address = user.Address,
-                            ContactNumber = user.ContactNumber,
-                            Status = user.EmailConfirmed ? "Active" : "Inactive"
-                        });
-                    }  
-                }
+                        Id = user.Id,
+                        FullName = (user.FirstName + " " + user.LastName).Trim(),
+                        Role = role.Name,
+                        Address = user.Address,
+                        ContactNumber = user.ContactNumber,
+                        Status = user.EmailConfirmed ? "Active" : "Inactive"
+                    }).ToListAsync();
 
-                return nonAdminUsers;
-               
+                return users;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine("Error fetching users: " + ex.Message);
                 return new List<UserViewDto>();
             }
+        }
+
+        public async Task<bool> DeactivateUserAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return false;
+
+            user.EmailConfirmed = false; // This flag is used as "Active"/"Inactive"
+            var result = await _userManager.UpdateAsync(user);
+
+            return result.Succeeded;
         }
 
 
