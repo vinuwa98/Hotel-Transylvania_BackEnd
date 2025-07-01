@@ -6,19 +6,32 @@ namespace HmsBackend.Models
 {
     public class User : IdentityUser
     {
-        [Required]
-        public required string FirstName { get; set; }
+        internal string FullName;
+        internal string Status;
+        public required string Role { get; set; }
 
+        //public int id { get; set; }
+
+        // limit to 50 characters
+
+        public string? FirstName { get; set; }
         public string? LastName { get; set; }
 
+        [Required]
         [DataType(DataType.Date)]
         public DateTime? DOB { get; set; }
 
         [MaxLength(250)]
         public string? Address { get; set; }
+
+        [Phone]
+        public string? ContactNumber { get; set; }
+
         public string? SupervisorID { get; set; }
-        public List<Room> Rooms { get; set; } = new();
-        public List<Complaint> Complaints { get; set; } = new();
-        public List<JobUser> JobUsers { get; set; } = new();
+
+      
+        public List<Room>? Rooms { get; set; } = new();
+        public List<Complaint>? Complaints { get; set; } = new();
+        public List<JobUser>? JobUsers { get; set; } = new();
     }
 }

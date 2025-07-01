@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 namespace HmsBackend
 {
-    public class AppDbContext : IdentityDbContext<IdentityUser>
+    public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<User>(options)
     {
         public DbSet<Room> Rooms { get; set; }
+        
+
         public DbSet<Complaint> Complaint => Set<Complaint>();
         public DbSet<Job> Job => Set<Job>();
 

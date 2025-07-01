@@ -1,6 +1,6 @@
-﻿using HmsBackend.Dto;
-using HmsBackend.Models;
+﻿using HmsBackend.DTOs;
 using System.ComponentModel.DataAnnotations;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace HmsBackend.DTOs
 {
@@ -9,28 +9,30 @@ namespace HmsBackend.DTOs
     public class RegistrationDto
     {
         [Required]
-        [EmailAddress]
-        public required string Email { get; set; }
-
-        [Required]
         public required string FirstName { get; set; }
 
         public string? LastName { get; set; }
 
-        [DataType(DataType.Date)]
-        public DateTime? DOB { get; set; }
-
-        [MaxLength(250)]
-        public string? Address { get; set; }
-
-        public string? SupervisorID { get; set; }
-        public string? ContactNumber { get; set; }
+        [Required]
+        public required string Role { get; set; }
 
         [Required]
+        [MinLength(6)]
         public required string Password { get; set; }
 
         [Required]
-        public required string Role { get; set; }
+        [EmailAddress]
+        public required string Email { get; set; }
+
+        [Phone]
+        public string? ContactNumber { get; set; }
+
+        [DataType(DataType.Date)]
+        public DateTime? DOB { get; set; }
+
+        public string? Address { get; set; }
+
+        public string? SupervisorID { get; set; }
     }
 
 }

@@ -30,6 +30,89 @@ builder.Services.AddSwaggerGen(c =>
         Description = "Enter 'Bearer' [space] and then your valid token in the text input below.\r\n\r\nExample: \"Bearer eyJhb...\""
     });
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("CleanerOnly", policy => policy.RequireRole("Cleaner"));
+    options.AddPolicy("SupervisorOnly", policy => policy.RequireRole("Supervisor"));
+    options.AddPolicy("MaintenanceStaffOnly", policy => policy.RequireRole("MaintenanceStaff"));
+    options.AddPolicy("MaintenanceManagerOnly", policy => policy.RequireRole("MaintenanceManager"));
+});
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger(); 
+
+    app.MapOpenApi(); 
+    app.MapScalarApiReference(); 
+
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("openapi/v1.json", ".NET Web API");
+        options.RoutePrefix = string.Empty;
+    });
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        context.Database.EnsureDeleted();
+        context.Database.EnsureCreated();
+    }
+
+    app.UseHttpsRedirection();
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.MapControllers();
+
+    app.Run();
+}
+*/
+
+using HmsBackend.Services;
+using HmsBackend.Services.Interfaces;
+using HmsBackend;
+using HmsBackend.Models;
+using HmsBackend.Repositories;
+using HmsBackend.Repositories.Interfaces;
+using HmsBackend.Services;
+using HmsBackend.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
+using System.Text;
+
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+// Add services
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddScoped<IUserCountRepository, UserCountRepository>();
+builder.Services.AddScoped<IUserCountService, UserCountService>();
+
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "HmsBackend API", Version = "v1" });
+
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Enter 'Bearer' followed by your token. Example: Bearer abc123..."
+    });
+
     c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {
         {
@@ -48,6 +131,7 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddTransient<IEmailService, EmailService>();
 
 
 builder.Services.AddCors(options =>
@@ -60,16 +144,20 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 builder.Services.Configure<IdentityOptions>(options =>
 {
+    options.Password.RequireDigit = false;
     options.Password.RequiredLength = 4;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
     options.Password.RequiredUniqueChars = 1;
     options.SignIn.RequireConfirmedEmail = false;
 });
@@ -78,7 +166,6 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
@@ -90,8 +177,7 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
     };
 });
 
@@ -116,8 +202,9 @@ async Task SeedRolesAndAdminAsync(IServiceProvider services)
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-    await context.Database.EnsureDeletedAsync();
-    await context.Database.EnsureCreatedAsync();
+    await context.Database.MigrateAsync();
+    //await context.Database.EnsureDeletedAsync(); // Optional: Remove if you want to persist data
+    //await context.Database.EnsureCreatedAsync();
 
     string[] roles = { "Admin", "Cleaner", "HelpDesk", "Supervisor", "MaintenanceStaff", "MaintenanceManager" };
     foreach (var role in roles)
@@ -126,29 +213,36 @@ async Task SeedRolesAndAdminAsync(IServiceProvider services)
             await roleManager.CreateAsync(new IdentityRole(role));
     }
 
-    var adminUser = new User
-    {
-        UserName = "admin@hms.com",
-        Email = "admin@hms.com",
-        EmailConfirmed = true,
-        FirstName = "Admin",
-        LastName = "User",
-        DOB = new DateTime(1990, 1, 1),
-        Address = "123 Admin Street",
-        PhoneNumber = "+1234567890"
-    };
+    string adminEmail = "admin@hms.com";
+    string adminPassword = "Admin@123";
 
-    if (await userManager.FindByEmailAsync(adminUser.Email) == null)
+    if (await userManager.FindByEmailAsync(adminEmail) == null)
     {
-        var result = await userManager.CreateAsync(adminUser, "Admin@123");
-        await userManager.AddToRoleAsync(adminUser, "Admin");
+        var adminUser = new User
+        {
+            UserName = adminEmail,
+            NormalizedUserName = adminEmail.ToUpper(),
+            Email = adminEmail,
+            NormalizedEmail = adminEmail.ToUpper(),
+            EmailConfirmed = true,
+            DOB = new DateTime(2002, 2, 2),
+            FirstName = "Admin",
+            LastName = "User",
+            Role = "Admin"
+        };
+
+
+        var createResult = await userManager.CreateAsync(adminUser, adminPassword);
+        if (createResult.Succeeded)
+        {
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
     }
 }
 
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
-
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
@@ -156,12 +250,6 @@ if (app.Environment.IsDevelopment())
         c.RoutePrefix = string.Empty;
     });
 
-    using (var scope = app.Services.CreateScope())
-    {
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        context.Database.EnsureDeleted();
-        context.Database.EnsureCreated();
-    }
     await SeedRolesAndAdminAsync(app.Services);
 }
 
