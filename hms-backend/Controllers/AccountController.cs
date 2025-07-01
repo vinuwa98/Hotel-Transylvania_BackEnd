@@ -1,5 +1,7 @@
-﻿using HmsBackend.Dto;
+﻿using hms_backend.DTOs;
+using HmsBackend.Dto;
 using HmsBackend.DTOs;
+using HmsBackend.Models;
 using HmsBackend.Services;
 using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -22,28 +24,9 @@ namespace HmsBackend.Controllers
         [Authorize(Policy = "AdminOnly")]
         [Route("add-user")]
         [HttpPost]
-        public async Task<IActionResult> AddUser(RegistrationDto registerRequest)
+        public async Task<StandardResponseDto<List<User>>> AddUser(RegistrationDto registerRequest)
         {
-            var result = await _userService.AddUserAsync(registerRequest);
-
-            if (!result.Succeeded)
-            {
-                var errors = result.Errors.Select(e => e.Description).ToList();
-
-                // Optional: log the errors
-                Console.WriteLine("User creation failed: " + string.Join(", ", errors));
-
-                return BadRequest(new
-                {
-                    message = "User creation failed",
-                    errors = errors
-                });
-            }
-
-            return Ok(new
-            {
-                message = "User created successfully"
-            });
+            return await _userService.AddUserAsync(registerRequest);
         }
 
         [HttpPost]

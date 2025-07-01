@@ -90,6 +90,8 @@ if (app.Environment.IsDevelopment())
 }
 */
 
+using hms_backend.Services;
+using hms_backend.Services.Interfaces;
 using HmsBackend;
 using HmsBackend.Models;
 using HmsBackend.Repositories;
@@ -98,6 +100,7 @@ using HmsBackend.Services;
 using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
@@ -144,6 +147,8 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddTransient<IEmailService, EmailService>();
+
 
 builder.Services.AddCors(options =>
 {

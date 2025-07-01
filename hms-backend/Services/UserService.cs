@@ -13,99 +13,66 @@ using System.Text;
 
 namespace HmsBackend.Services
 {
-    public class UserService(IUserRepository userRepository, IConfiguration configuration) : IUserService
+    public class UserService(UserManager<User> userManager, IUserRepository userRepository, IConfiguration configuration) : IUserService
     {
         private readonly IConfiguration _configuration = configuration;
         private readonly IUserRepository _userRepository = userRepository;
 
-        public async Task<IdentityResult> AddUserAsync(RegistrationDto registerRequest)
+        private readonly UserManager<User> _userManager = userManager;
+
+        public async Task<StandardResponseDto<List<User>>> AddUserAsync(RegistrationDto registerRequest)
         {
             try
             {
                 if (registerRequest == null)
                 {
-                    // You cannot return BadRequestResult here, since return type is IdentityResult
-                    // Instead, return a failed IdentityResult with an error message
-                    return IdentityResult.Failed(new IdentityError { Description = "RegisterRequest cannot be null" });
+                    return new StandardResponseDto<List<User>>(StatusCodes.Status400BadRequest, "Registration request cannot be null", null);
                 }
 
-                var result = await _userRepository.AddUserAsync(registerRequest);
+                if (await _userManager.FindByEmailAsync(registerRequest.Email) != null)
+                {
+                    return new StandardResponseDto<List<User>>(StatusCodes.Status400BadRequest, "You can't create more than one user with the same username",null);
+                }
 
-                return result;  // Just return 
+                //var result = await _userRepository.AddUserAsync(registerRequest);
+                var newUser = CreateNewUser(registerRequest);
+
+                var result = await _userManager.CreateAsync(newUser, registerRequest.Password);
+
+                if (result.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(newUser, registerRequest.Role);
+                }
+
+                var users = _userManager.Users.ToList().Where(u => u.Role != "Admin").ToList();
+
+                return new StandardResponseDto<List<User>>(StatusCodes.Status200OK, "User added successfully", users);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return IdentityResult.Failed(new IdentityError { Description = "An unexpected error occurred while adding the user." });
-
+                return new StandardResponseDto<List<User>>(StatusCodes.Status500InternalServerError, "User not added!", null);
             }
         }
 
-
-        /*
-
-        public async Task<IActionResult> LoginAsync(UserDto user)
-        {
-            var identityUser = await _userRepository.FindByEmailAsync(user.Email);
-
-            if (identityUser != null && await _userRepository.CheckPasswordAsync(identityUser, user.Password))
-            {
-                var roles = await _userRepository.GetRolesAsync(identityUser);
-
-                var claims = new List<Claim>
-            {
-                new Claim("UserId", identityUser.Id.ToString())
-            };
-
-                foreach (var role in roles)
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, role));
-                }
-
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = new ClaimsIdentity(claims),
-                    Issuer = _configuration["Jwt:Issuer"],
-                    Audience = _configuration["Jwt:Audience"],
-                    Expires = DateTime.UtcNow.AddMonths(1),
-                    SigningCredentials = new SigningCredentials(
-                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])),
-                        SecurityAlgorithms.HmacSha256Signature
-                    ),
-                };
-
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var token = tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
-
-                return new OkObjectResult(new { UserID = identityUser.Id, Token = token });
-            }
-
-            return new NotFoundObjectResult("Invalid username or password");
-        }
-        */
-        public async Task<IActionResult> LoginAsync(UserDto user)
+        public async Task<StandardResponseDto<LoginSuccessDto>> LoginAsync(UserDto user)
         {
             try
             {
                 var identityUser = await _userRepository.FindByEmailAsync(user.Email.Trim());
 
-
-
                 if (identityUser != null)
                 {
-                    Console.WriteLine($"Found User: {identityUser.Email}");
-
                     var passwordCorrect = await _userRepository.CheckPasswordAsync(identityUser, user.Password);
-                    Console.WriteLine($"Password Correct: {passwordCorrect}");
 
                     if (passwordCorrect)
                     {
                         var roles = await _userRepository.GetRolesAsync(identityUser);
 
                         var claims = new List<Claim>
-            {
-                new Claim("UserId", identityUser.Id.ToString())
-            };
+                        {
+                            new Claim("UserId", identityUser.Id.ToString())
+                        };
 
                         foreach (var role in roles)
                         {
@@ -127,24 +94,20 @@ namespace HmsBackend.Services
                         var tokenHandler = new JwtSecurityTokenHandler();
                         var token = tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
 
-                        Console.WriteLine($"Login Success: Token generated for {identityUser.Email}");
-                        return new OkObjectResult(new { UserID = identityUser.Id, Token = token });
+                        var result = new LoginSuccessDto { Token = token, UserId = identityUser.Id };
+
+                        return new StandardResponseDto<LoginSuccessDto>(StatusCodes.Status200OK, "Login successful", result);
                     }
                 }
 
-                Console.WriteLine("Login Failed: Invalid email or password");
-                return new NotFoundObjectResult("Invalid username or password");
-
+                return new StandardResponseDto<LoginSuccessDto>(StatusCodes.Status500InternalServerError, $"Cannot find a user with email '{user.Email}'", null);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return new StatusCodeResult(500);
+                return new StandardResponseDto<LoginSuccessDto>(StatusCodes.Status500InternalServerError, "Login failed", null);
             }
-
         }
-
-
 
         public async Task<IActionResult> UpdateUserAsync(UpdateUserDto dto)
         {
@@ -170,21 +133,29 @@ namespace HmsBackend.Services
             }
         }
 
-        // fetch all the users from the repository
         public async Task<List<UserViewDto>> GetAllUsersAsync()
         {
             return await _userRepository.GetAllUsersAsync();
         }
 
-        //public async Task<User?> FindUserByIdAsync(string userId)
-        //{
-        //    return await _userRepository.FindUserByIdAsync(userId);
-        //}
+        private User CreateNewUser(RegistrationDto registerRequest)
+        {
+            var normalizedEmail = registerRequest.Email.Trim().ToLower();
 
-        //public async Task<IdentityResult> UpdateUserStatusAsync(User user)
-        //{
-        //    return await _userRepository.UpdateUserStatusAsync(user);
-        //}
-
+            return new User
+            {
+                UserName = registerRequest.Email,
+                NormalizedUserName = registerRequest.Email.ToUpper(),
+                Email = registerRequest.Email,
+                NormalizedEmail = registerRequest.Email.ToUpper(),
+                EmailConfirmed = true,
+                FirstName = registerRequest.FirstName,
+                LastName = registerRequest.LastName,
+                DOB = registerRequest.DOB,
+                Address = registerRequest.Address,
+                ContactNumber = registerRequest.ContactNumber,
+                SupervisorID = registerRequest.SupervisorID
+            };
+        }
     }
 }
