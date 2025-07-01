@@ -9,7 +9,7 @@ namespace HmsBackend.Models
     {
         internal string FullName;
         internal string Status;
-        internal string Role;
+        public required string Role { get; set; }
 
         //public int id { get; set; }
 

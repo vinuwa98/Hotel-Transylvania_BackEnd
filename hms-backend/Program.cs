@@ -218,8 +218,9 @@ async Task SeedRolesAndAdminAsync(IServiceProvider services)
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-    await context.Database.EnsureDeletedAsync(); // Optional: Remove if you want to persist data
-    await context.Database.EnsureCreatedAsync();
+    await context.Database.MigrateAsync();
+    //await context.Database.EnsureDeletedAsync(); // Optional: Remove if you want to persist data
+    //await context.Database.EnsureCreatedAsync();
 
     string[] roles = { "Admin", "Cleaner", "HelpDesk", "Supervisor", "MaintenanceStaff", "MaintenanceManager" };
     foreach (var role in roles)
@@ -242,7 +243,8 @@ async Task SeedRolesAndAdminAsync(IServiceProvider services)
             EmailConfirmed = true,
             DOB = new DateTime(2002, 2, 2),
             FirstName = "Admin",
-            LastName = "User"
+            LastName = "User",
+            Role = "Admin"
         };
 
 

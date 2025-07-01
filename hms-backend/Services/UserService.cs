@@ -154,7 +154,8 @@ namespace HmsBackend.Services
                 DOB = registerRequest.DOB,
                 Address = registerRequest.Address,
                 ContactNumber = registerRequest.ContactNumber,
-                SupervisorID = registerRequest.SupervisorID
+                SupervisorID = registerRequest.SupervisorID,
+                Role = registerRequest.Role,
             };
         }
     }
