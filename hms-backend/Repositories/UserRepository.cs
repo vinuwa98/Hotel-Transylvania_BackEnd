@@ -143,6 +143,8 @@ namespace HmsBackend.Repositories
             }
         }
 
+
+        
         public async Task<List<UserViewDto>> GetAllUsersAsync()
         {
             try
@@ -183,12 +185,11 @@ namespace HmsBackend.Repositories
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return false;
 
-            user.EmailConfirmed = false; // This flag is used as "Active"/"Inactive"
+            user.EmailConfirmed = !user.EmailConfirmed; 
+
             var result = await _userManager.UpdateAsync(user);
 
             return result.Succeeded;
         }
-
-
     }
 }
