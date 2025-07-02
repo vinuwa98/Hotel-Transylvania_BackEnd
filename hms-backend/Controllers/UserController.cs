@@ -74,5 +74,18 @@ namespace HmsBackend.Controllers
             var count = await _userCountService.GetUserCountAsync();
             return Ok(new { totalUsers = count });
         }
+
+
+        [Authorize(Policy = "AdminOnly")]
+        [HttpPut("deactivate-user/{userId}")]
+        public async Task<IActionResult> DeactivateUser(string userId)
+        {
+            var success = await _userService.DeactivateUserAsync(userId);
+            if (!success)
+                return NotFound(new { message = "User not found or could not be deactivated" });
+
+            return Ok(new { message = "User deactivated successfully" });
+        }
+
     }
 }

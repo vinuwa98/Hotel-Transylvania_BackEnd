@@ -146,51 +146,51 @@ namespace HmsBackend.Repositories
 
 
         
-        public async Task<List<UserViewDto>> GetAllUsersAsync()
-        {
-            try
-            {
-                // Get the Admin Role ID
-                var adminRoleId = await _context.Roles
-                    .Where(r => r.Name == "Admin")
-                    .Select(r => r.Id)
-                    .FirstOrDefaultAsync();
+        //public async Task<List<UserViewDto>> GetAllUsersAsync()
+        //{
+        //    try
+        //    {
+        //        // Get the Admin Role ID
+        //        var adminRoleId = await _context.Roles
+        //            .Where(r => r.Name == "Admin")
+        //            .Select(r => r.Id)
+        //            .FirstOrDefaultAsync();
 
-                // Fetch non-admin users using joins
-                var users = await (
-                    from user in _context.Users
-                    join userRole in _context.UserRoles on user.Id equals userRole.UserId
-                    join role in _context.Roles on userRole.RoleId equals role.Id
-                    where userRole.RoleId != adminRoleId
-                    select new UserViewDto
-                    {
-                        Id = user.Id,
-                        FullName = (user.FirstName + " " + user.LastName).Trim(),
-                        Role = role.Name,
-                        Address = user.Address,
-                        ContactNumber = user.ContactNumber,
-                        Status = user.EmailConfirmed ? "Active" : "Inactive"
-                    }).ToListAsync();
+        //        // Fetch non-admin users using joins
+        //        var users = await (
+        //            from user in _context.Users
+        //            join userRole in _context.UserRoles on user.Id equals userRole.UserId
+        //            join role in _context.Roles on userRole.RoleId equals role.Id
+        //            where userRole.RoleId != adminRoleId
+        //            select new UserViewDto
+        //            {
+        //                Id = user.Id,
+        //                FullName = (user.FirstName + " " + user.LastName).Trim(),
+        //                Role = role.Name,
+        //                Address = user.Address,
+        //                ContactNumber = user.ContactNumber,
+        //                Status = user.EmailConfirmed ? "Active" : "Inactive"
+        //            }).ToListAsync();
 
-                return users;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error fetching users: " + ex.Message);
-                return new List<UserViewDto>();
-            }
-        }
+        //        return users;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine("Error fetching users: " + ex.Message);
+        //        return new List<UserViewDto>();
+        //    }
+        //}
 
-        public async Task<bool> DeactivateUserAsync(string userId)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null) return false;
+        //public async Task<bool> DeactivateUserAsync(string userId)
+        //{
+        //    var user = await _userManager.FindByIdAsync(userId);
+        //    if (user == null) return false;
 
-            user.EmailConfirmed = !user.EmailConfirmed; 
+        //    user.EmailConfirmed = !user.EmailConfirmed; 
 
-            var result = await _userManager.UpdateAsync(user);
+        //    var result = await _userManager.UpdateAsync(user);
 
-            return result.Succeeded;
-        }
+        //    return result.Succeeded;
+        //}
     }
 }

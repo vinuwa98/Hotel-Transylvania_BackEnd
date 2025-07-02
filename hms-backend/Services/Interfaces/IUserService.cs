@@ -13,8 +13,5 @@ namespace HmsBackend.Services.Interfaces
         Task<List<UserViewDto>> GetAllUsersAsync();
 
         Task<bool> DeactivateUserAsync(string userId);
-       
-
-
     }
 }
