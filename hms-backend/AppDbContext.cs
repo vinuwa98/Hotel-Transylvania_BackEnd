@@ -1,5 +1,4 @@
 ﻿using HmsBackend.Models;
-using HmsBackend.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 namespace HmsBackend
