@@ -12,8 +12,6 @@ namespace HmsBackend
         public DbSet<Complaint> Complaint => Set<Complaint>();
         public DbSet<Job> Job => Set<Job>();
 
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
