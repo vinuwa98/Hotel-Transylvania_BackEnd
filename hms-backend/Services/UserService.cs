@@ -23,50 +23,57 @@ namespace HmsBackend.Services
             try
             {
                 var identityUser = await FindByEmailAsync(user.Email.Trim());
+                if (identityUser == null)
+                    throw new InvalidOperationException("Bad credentials!");
 
-                if (identityUser != null)
-                {
-                    var passwordCorrect = await CheckPasswordAsync(identityUser, user.Password);
+                var passwordCorrect = await CheckPasswordAsync(identityUser, user.Password);
+                if (!passwordCorrect)
+                    throw new InvalidOperationException("Bad credentials!");
 
-                    if (passwordCorrect)
-                    {
-                        var userWithRoles = await AssignRoles(identityUser);
-
-                        return new DataTransferObject<LoginSuccessDto> { Message = "Login Successful", Data = userWithRoles };
-                    }
-                }
-
-                return new DataTransferObject<LoginSuccessDto> { Message = $"Cannot find a user with email '{user.Email}'", Data = null };
+                var userWithRoles = await AssignRoles(identityUser);
+                return new DataTransferObject<LoginSuccessDto> { Message = "Login Successful", Data = userWithRoles };
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine(ex.Message);
-                return new DataTransferObject<LoginSuccessDto> { Message = "Login failed", Data = null };
+                throw new InvalidOperationException("Unexpected exception occurred!");
             }
         }
 
-        public async Task<DataTransferObject<List<User>>> AddUserAsync(RegistrationDto registerRequest)
+        public async Task<DataTransferObject<List<UserViewDto>>> AddUserAsync(RegistrationDto registerRequest)
         {
             try
             {
                 var newUser = CreateNewUser(registerRequest);
-
                 var result = await _userManager.CreateAsync(newUser, registerRequest.Password);
 
-                if (result.Succeeded)
-                {
-                    await _userManager.AddToRoleAsync(newUser, registerRequest.Role);
-                }
+                if (!result.Succeeded)
+                    throw new InvalidOperationException("Failed to create user.");
 
-                var users = _userManager.Users.ToList().Where(u => u.Role != "Admin").ToList();
+                await _userManager.AddToRoleAsync(newUser, registerRequest.Role);
 
-                return new DataTransferObject<List<User>> { Message = "User added successfully", Data = users };
+                var users = _userManager.Users
+                    .Where(u => u.Role != "Admin")
+                    .Select(u => new UserViewDto
+                    {
+                        FullName = u.FullName,
+                        FirstName = u.FirstName,
+                        LastName = u.LastName,
+                        Address = u.Address,
+                        Role = u.Role,
+                        ContactNumber = u.ContactNumber,
+                        Status = u.Status
+                    })
+                    .ToList();
+
+                return new DataTransferObject<List<UserViewDto>> { Message = "User added successfully", Data = users };
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new InvalidOperationException($"User creation failed: {ex.Message}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-
-                return new DataTransferObject<List<User>> { Message = "User addition failed", Data = null };
+                throw new Exception("Unexpected error occurred while adding user.", ex);
             }
         }
 

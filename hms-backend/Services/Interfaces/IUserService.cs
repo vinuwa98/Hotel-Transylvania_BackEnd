@@ -6,7 +6,7 @@ namespace HmsBackend.Services.Interfaces
 {
     public interface IUserService
     {
-        Task<DataTransferObject<List<User>>> AddUserAsync(RegistrationDto registerRequest);
+        Task<DataTransferObject<List<UserViewDto>>> AddUserAsync(RegistrationDto registerRequest);
         Task<bool> IsUserAlreadyExists(string email);
         Task<DataTransferObject<LoginSuccessDto>> LoginAsync(UserDto user);
         Task<IActionResult> UpdateUserAsync(UpdateUserDto updateUserDto);

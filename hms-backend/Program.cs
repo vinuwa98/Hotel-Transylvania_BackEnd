@@ -1,92 +1,13 @@
-using HmsBackend;
-using HmsBackend.Models;
-using HmsBackend.Repositories;
-using HmsBackend.Repositories.Interfaces;
-using HmsBackend.Services;
-using HmsBackend.Services.Interfaces;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Text;
-
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddControllers();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new() { Title = "HmsBackend API", Version = "v1" });
-
-    // Add JWT Authentication to swagger
-    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "Enter 'Bearer' [space] and then your valid token in the text input below.\r\n\r\nExample: \"Bearer eyJhb...\""
-    });
-
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("CleanerOnly", policy => policy.RequireRole("Cleaner"));
-    options.AddPolicy("SupervisorOnly", policy => policy.RequireRole("Supervisor"));
-    options.AddPolicy("MaintenanceStaffOnly", policy => policy.RequireRole("MaintenanceStaff"));
-    options.AddPolicy("MaintenanceManagerOnly", policy => policy.RequireRole("MaintenanceManager"));
-});
-
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-
-var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger(); 
-
-    app.MapOpenApi(); 
-    app.MapScalarApiReference(); 
-
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("openapi/v1.json", ".NET Web API");
-        options.RoutePrefix = string.Empty;
-    });
-
-    using (var scope = app.Services.CreateScope())
-    {
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        context.Database.EnsureDeleted();
-        context.Database.EnsureCreated();
-    }
-
-    app.UseHttpsRedirection();
-    app.UseAuthentication();
-    app.UseAuthorization();
-    app.MapControllers();
-
-    app.Run();
-}
-*/
-
 using HmsBackend.Services;
 using HmsBackend.Services.Interfaces;
 using HmsBackend;
 using HmsBackend.Models;
 using HmsBackend.Repositories;
 using HmsBackend.Repositories.Interfaces;
-using HmsBackend.Services;
-using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Scalar.AspNetCore;
 using System.Text;
 
 builder.Services.AddScoped<IUserService, UserService>();
@@ -132,7 +53,6 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IEmailService, EmailService>();
-
 
 builder.Services.AddCors(options =>
 {

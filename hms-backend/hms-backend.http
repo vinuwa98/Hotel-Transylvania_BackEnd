@@ -1,6 +1,32 @@
+@hms-backend_HostAddress = https://localhost:7172
 @hms_backend_HostAddress = http://localhost:5175
 
-GET {{hms_backend_HostAddress}}/weatherforecast/
-Accept: application/json
+###
+
+POST {{hms-backend_HostAddress}}/api/user/login
+Content-Type: application/json
+
+{
+  "email": "admin@hms.com",
+  "password": "Admin@123"
+}
+
+###
+
+POST {{hms-backend_HostAddress}}/api/user/add-user
+Authorization: {{$apiKey}}
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "firstName": "John",
+  "lastName": "Doe",
+  "dob": "2025-06-30",
+  "address": "789 Oak Avenue, Springfield",
+  "supervisorID": "s9t8u7v6-w5x4-3210-yzab-9876543210cd",
+  "contactNumber": "+11234567890",
+  "password": "1234567",
+  "role": "MaintenanceStaff"
+}
 
 ###
