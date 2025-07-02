@@ -90,6 +90,8 @@ if (app.Environment.IsDevelopment())
 }
 */
 
+using HmsBackend.Services;
+using HmsBackend.Services.Interfaces;
 using HmsBackend;
 using HmsBackend.Models;
 using HmsBackend.Repositories;
@@ -98,6 +100,7 @@ using HmsBackend.Services;
 using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
@@ -144,6 +147,8 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddTransient<IEmailService, EmailService>();
+
 
 builder.Services.AddCors(options =>
 {
@@ -213,8 +218,9 @@ async Task SeedRolesAndAdminAsync(IServiceProvider services)
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-    await context.Database.EnsureDeletedAsync(); // Optional: Remove if you want to persist data
-    await context.Database.EnsureCreatedAsync();
+    await context.Database.MigrateAsync();
+    //await context.Database.EnsureDeletedAsync(); // Optional: Remove if you want to persist data
+    //await context.Database.EnsureCreatedAsync();
 
     string[] roles = { "Admin", "Cleaner", "HelpDesk", "Supervisor", "MaintenanceStaff", "MaintenanceManager" };
     foreach (var role in roles)
@@ -237,7 +243,8 @@ async Task SeedRolesAndAdminAsync(IServiceProvider services)
             EmailConfirmed = true,
             DOB = new DateTime(2002, 2, 2),
             FirstName = "Admin",
-            LastName = "User"
+            LastName = "User",
+            Role = "Admin"
         };
 
 

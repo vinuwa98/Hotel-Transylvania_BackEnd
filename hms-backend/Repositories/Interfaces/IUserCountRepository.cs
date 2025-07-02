@@ -2,6 +2,6 @@
 {
     public interface IUserCountRepository
     {
-        Task<int> GetTotalUserCountAsync();
+        //Task<int> GetTotalUserCountAsync();
     }
 }
