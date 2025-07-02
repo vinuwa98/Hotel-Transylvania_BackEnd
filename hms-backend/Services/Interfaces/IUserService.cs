@@ -9,7 +9,7 @@ namespace HmsBackend.Services.Interfaces
         Task<DataTransferObject<List<UserViewDto>>> AddUserAsync(RegistrationDto registerRequest);
         Task<bool> IsUserAlreadyExists(string email);
         Task<DataTransferObject<LoginSuccessDto>> LoginAsync(UserDto user);
-        Task<IActionResult> UpdateUserAsync(UpdateUserDto updateUserDto);
+        Task<DataTransferObject<string>> UpdateUserAsync(UpdateUserDto updateUserDto);
         Task<List<UserViewDto>> GetAllUsersAsync();
 
         Task<bool> DeactivateUserAsync(string userId);

@@ -81,27 +81,52 @@ namespace HmsBackend.Services
             }
         }
 
-        public async Task<IActionResult> UpdateUserAsync(UpdateUserDto dto)
+        public async Task<DataTransferObject<string>> UpdateUserAsync(UpdateUserDto dto)
         {
             try
             {
-                if (dto == null) return new BadRequestResult();
+                var user = await _userManager.FindByIdAsync(dto.UserId);
+                if (user == null)
+                    throw new InvalidOperationException("User not found.");
 
-                var result = await _userRepository.UpdateUserAsync(dto);
+                user.Email = dto.Email;
+                user.UserName = dto.Email;
+                user.ContactNumber = dto.ContactNumber;
+                user.FirstName = dto.FirstName;
+                user.LastName = dto.LastName;
+                user.Address = dto.Address;
+                user.DOB = dto.DOB;
 
-                if (result.Succeeded)
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var passwordResult = await _userManager.ResetPasswordAsync(user, token, dto.Password);
+                if (!passwordResult.Succeeded)
+                    throw new InvalidOperationException("Password reset failed.");
+
+                var currentRoles = await _userManager.GetRolesAsync(user);
+                if (!currentRoles.Contains(dto.Role))
                 {
-                    return new OkObjectResult("User updated successfully");
+                    var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                    if (!removeResult.Succeeded)
+                        throw new InvalidOperationException("Removing old roles failed.");
+
+                    var addResult = await _userManager.AddToRoleAsync(user, dto.Role);
+                    if (!addResult.Succeeded)
+                        throw new InvalidOperationException("Assigning new role failed.");
                 }
-                else
-                {
-                    return new BadRequestObjectResult(result.Errors);
-                }
+
+                var updateResult = await _userManager.UpdateAsync(user);
+                if (!updateResult.Succeeded)
+                    throw new InvalidOperationException("User update failed.");
+
+                return new DataTransferObject<string> { Message = "User updated successfully", Data = user.Id };
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new InvalidOperationException($"User update failed: {ex.Message}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                return new StatusCodeResult(500); // Internal Server Error
+                throw new Exception("Unexpected error occurred while updating user.", ex);
             }
         }
 

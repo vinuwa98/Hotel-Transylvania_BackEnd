@@ -121,7 +121,7 @@ async Task SeedRolesAndAdminAsync(IServiceProvider services)
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-    await context.Database.MigrateAsync();
+    //await context.Database.MigrateAsync();
     //await context.Database.EnsureDeletedAsync(); // Optional: Remove if you want to persist data
     //await context.Database.EnsureCreatedAsync();
 

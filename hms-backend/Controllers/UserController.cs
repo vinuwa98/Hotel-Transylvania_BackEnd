@@ -57,15 +57,25 @@ namespace HmsBackend.Controllers
             }
         }
 
-
         [Authorize(Policy = "AdminOnly")]
         [Route("update-user")]
         [HttpPut]
-        public async Task<IActionResult> UpdateUser(UpdateUserDto updateUserDto)
+        public async Task<IActionResult> UpdateUser(UpdateUserDto dto)
         {
-            var result = await _userService.UpdateUserAsync(updateUserDto);
-            return result;
+            if (dto == null)
+                return BadRequest("Invalid user data.");
+
+            try
+            {
+                var result = await _userService.UpdateUserAsync(dto);
+                return Ok(result);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while updating the user.");
+            }
         }
+
 
         [Authorize(Policy = "AdminOnly")]
         [Route("get-users")]
