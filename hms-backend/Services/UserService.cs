@@ -4,19 +4,23 @@ using HmsBackend.Repositories.Interfaces;
 using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
 namespace HmsBackend.Services
 {
-    public class UserService(UserManager<User> userManager, IUserRepository userRepository, IConfiguration configuration) : IUserService
+    public class UserService(UserManager<User> userManager, IUserRepository userRepository, IConfiguration configuration,AppDbContext appDbContext) : IUserService
     {
         private readonly IConfiguration _configuration = configuration;
         private readonly IUserRepository _userRepository = userRepository; // TODO: remove this
 
         private readonly UserManager<User> _userManager = userManager;
+        private readonly AppDbContext _context = appDbContext;
+      
 
         public async Task<DataTransferObject<LoginSuccessDto>> LoginAsync(UserDto user)
         {
@@ -103,7 +107,38 @@ namespace HmsBackend.Services
 
         public async Task<List<UserViewDto>> GetAllUsersAsync()
         {
-            return await _userRepository.GetAllUsersAsync();
+           
+            try
+            {
+                // Get the Admin Role ID
+                var adminRoleId = await _context.Roles
+                    .Where(r => r.Name == "Admin")
+                    .Select(r => r.Id)
+                    .FirstOrDefaultAsync();
+
+                // Fetch non-admin users using joins
+                var users = await (
+                    from user in _context.Users
+                    join userRole in _context.UserRoles on user.Id equals userRole.UserId
+                    join role in _context.Roles on userRole.RoleId equals role.Id
+                    where userRole.RoleId != adminRoleId
+                    select new UserViewDto
+                    {
+                        Id = user.Id,
+                        FullName = (user.FirstName + " " + user.LastName).Trim(),
+                        Role = role.Name,
+                        Address = user.Address,
+                        ContactNumber = user.ContactNumber,
+                        Status = user.EmailConfirmed ? "Active" : "Inactive"
+                    }).ToListAsync();
+
+                return users;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error fetching users: " + ex.Message);
+                return new List<UserViewDto>();
+            }
         }
 
         public async Task<bool> IsUserAlreadyExists(string email)
@@ -197,6 +232,19 @@ namespace HmsBackend.Services
                 SupervisorID = registerRequest.SupervisorID,
                 Role = registerRequest.Role,
             };
+        }
+
+        public async Task<bool> DeactivateUserAsync(string userId)
+        {
+    
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return false;
+
+            user.EmailConfirmed = !user.EmailConfirmed;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            return result.Succeeded;
         }
     }
 }
