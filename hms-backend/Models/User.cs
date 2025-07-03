@@ -5,8 +5,17 @@ namespace HmsBackend.Models
 {
     public class User : IdentityUser
     {
-        [Required]
-        public required string FirstName { get; set; }
+        internal string FullName;
+        internal string Status;
+        public required string Role { get; set; }
+
+        public bool IsActive { get; set; } = true;
+
+        //public int id { get; set; }
+
+        // limit to 50 characters
+
+        public string? FirstName { get; set; }
         public string? LastName { get; set; }
 
         [DataType(DataType.Date)]

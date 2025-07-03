@@ -118,8 +118,8 @@ namespace HmsBackend.Controllers
 
 
         [Authorize(Policy = "AdminOnly")]
-        [HttpPut("deactivate-user/{userId}")]
-        public async Task<IActionResult> DeactivateUser(string userId)
+        [HttpPut("deactivate-user")]
+        public async Task<IActionResult> DeactivateUser([FromBody] string userId)
         {
             var success = await _userService.DeactivateUserAsync(userId);
             if (!success)
@@ -127,5 +127,17 @@ namespace HmsBackend.Controllers
 
             return Ok(new { message = "User deactivated successfully" });
         }
+
+        [Authorize(Policy = "AdminOnly")]
+        [HttpPut("activate-user")]
+        public async Task<IActionResult> ActivateUser([FromBody] string userId)
+        {
+            var success = await _userService.ActivateUserAsync(userId);
+            if (!success)
+                return NotFound(new { message = "User not found or already active" });
+
+            return Ok(new { message = "User activated successfully" });
+        }
+
     }
 }

@@ -229,7 +229,7 @@ namespace HmsBackend.Services
                         Role = role.Name,
                         Address = user.Address,
                         ContactNumber = user.ContactNumber,
-                        Status = user.EmailConfirmed ? "Active" : "Inactive"
+                        Status = user.IsActive ? "Active" : "Inactive"
                     }).ToListAsync();
 
                 return users;
@@ -337,15 +337,52 @@ namespace HmsBackend.Services
 
         public async Task<bool> DeactivateUserAsync(string userId)
         {
-    
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null) return false;
+            try
+            {
+                var user = await _context.Users
+                    .Where (u => u.Id == userId)
+                    .FirstOrDefaultAsync();
 
-            user.EmailConfirmed = !user.EmailConfirmed;
+                if (user == null) return false;
 
-            var result = await _userManager.UpdateAsync(user);
+                user.IsActive = false;
 
-            return result.Succeeded;
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+        }
+
+        public async Task<bool> ActivateUserAsync(string userId)
+        {
+            try
+            {
+                var user = await _context.Users
+                    .Where(u => u.Id == userId)
+                    .FirstOrDefaultAsync();
+
+                if (user == null) return false;
+
+
+                user.IsActive = true;
+
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
         }
     }
 }

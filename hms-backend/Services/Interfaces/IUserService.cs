@@ -15,5 +15,7 @@ namespace HmsBackend.Services.Interfaces
         DataTransferObject<List<SupervisorInfoDto>> GetAllSupervisors();
 
         Task<bool> DeactivateUserAsync(string userId);
+
+        Task<bool> ActivateUserAsync(string userId);
     }
 }
