@@ -146,7 +146,7 @@ async Task SeedRolesAndAdminAsync(IServiceProvider services)
             FirstName = "Admin",
             LastName = "User",
             Role = "Admin",
-            Status = "Active"
+            IsActive = true
         };
 
 

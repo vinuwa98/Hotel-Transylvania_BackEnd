@@ -65,7 +65,7 @@ namespace HmsBackend.Services
                         Address = u.Address,
                         Role = u.Role,
                         ContactNumber = u.ContactNumber,
-                        Status = u.Status
+                        Status = u.IsActive ? "Active" : "Inactive"
                     })
                     .ToList();
 
@@ -330,8 +330,7 @@ namespace HmsBackend.Services
                 Address = registerRequest.Address,
                 ContactNumber = registerRequest.ContactNumber,
                 SupervisorID = registerRequest.SupervisorID,
-                Role = registerRequest.Role,
-                Status = "Active"
+                Role = registerRequest.Role
             };
         }
 

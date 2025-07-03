@@ -5,7 +5,7 @@ namespace HmsBackend.Models
 {
     public class User : IdentityUser
     {
-        public string? Status { get; set; }
+        //public string? Status { get; set; }
 
         public bool IsActive { get; set; } = true;
 
