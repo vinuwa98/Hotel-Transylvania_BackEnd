@@ -81,15 +81,20 @@ namespace HmsBackend.Controllers
         {
             var result = await _userService.UpdateUserAsync(updateUserDto);
 
-            // Fix: Explicitly convert the DataTransferObject to an IActionResult
-            if (result.Data != null)
+            try
             {
-                return Ok(result);
+                // Fix: Explicitly convert the DataTransferObject to an IActionResult
+                if (result.Data != null)
+                {
+                    return Ok(result);
+                }
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
+
+            return null;
         }
 
 

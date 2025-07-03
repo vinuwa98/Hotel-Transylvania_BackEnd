@@ -103,7 +103,7 @@ namespace HmsBackend.Services
             }
         }
 
-        public async Task<DataTransferObject<string>> UpdateUserAsync(UpdateUserDto dto)
+        public async Task<DataTransferObject<List<User>>> UpdateUserAsync(UpdateUserDto dto)
         {
             try
             {
@@ -117,7 +117,7 @@ namespace HmsBackend.Services
                     };
                 }
 
-                // 🔄 Update user fields
+                //Update user fields
                 user.Email = dto.Email;
                 user.UserName = dto.Email;
                 user.ContactNumber = dto.ContactNumber;
@@ -126,7 +126,7 @@ namespace HmsBackend.Services
                 user.Address = dto.Address;
                 user.DOB = dto.DOB;
 
-                // 🔐 Update password
+                //Update password
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var passwordResult = await _userManager.ResetPasswordAsync(user, token, dto.Password);
                 if (!passwordResult.Succeeded)
@@ -138,7 +138,7 @@ namespace HmsBackend.Services
                     };
                 }
 
-                // 🔁 Update roles if needed
+                //Update roles if needed
                 var currentRoles = await _userManager.GetRolesAsync(user);
                 if (!currentRoles.Contains(dto.Role))
                 {
@@ -163,7 +163,7 @@ namespace HmsBackend.Services
                     }
                 }
 
-                // ✅ Final save
+                //Final save
                 var updateResult = await _userManager.UpdateAsync(user);
                 if (!updateResult.Succeeded)
                 {
