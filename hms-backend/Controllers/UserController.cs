@@ -54,7 +54,17 @@ namespace HmsBackend.Controllers
         public async Task<IActionResult> UpdateUser(UpdateUserDto updateUserDto)
         {
             var result = await _userService.UpdateUserAsync(updateUserDto);
-            return result;
+
+            // Fix: Explicitly convert the DataTransferObject to an IActionResult
+            if (result.Data != null)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                // You might want to return a more specific error message based on result.Message
+                return BadRequest(result.Message);
+            }
         }
 
         [Authorize(Policy = "AdminOnly")]

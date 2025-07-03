@@ -74,29 +74,107 @@ namespace HmsBackend.Services
             }
         }
 
-        public async Task<IActionResult> UpdateUserAsync(UpdateUserDto dto)
+        public async Task<DataTransferObject<List<User>>> UpdateUserAsync(UpdateUserDto dto)
         {
             try
             {
-                if (dto == null) return new BadRequestResult();
-
-                var result = await _userRepository.UpdateUserAsync(dto);
-
-                if (result.Succeeded)
+                var user = await _userManager.FindByIdAsync(dto.UserId);
+                if (user == null)
                 {
-                    return new OkObjectResult("User updated successfully");
+                    return new DataTransferObject<List<User>>
+                    {
+                        Message = "User not found",
+                        Data = null
+                    };
                 }
-                else
+
+                // 🔄 Update user fields
+                user.Email = dto.Email;
+                user.UserName = dto.Email;
+                user.ContactNumber = dto.ContactNumber;
+                user.FirstName = dto.FirstName;
+                user.LastName = dto.LastName;
+                user.Address = dto.Address;
+                user.DOB = dto.DOB;
+
+                // 🔐 Update password
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var passwordResult = await _userManager.ResetPasswordAsync(user, token, dto.Password);
+                if (!passwordResult.Succeeded)
                 {
-                    return new BadRequestObjectResult(result.Errors);
+                    return new DataTransferObject<List<User>>
+                    {
+                        Message = "Password update failed",
+                        Data = null
+                    };
                 }
+
+                // 🔁 Update roles if needed
+                var currentRoles = await _userManager.GetRolesAsync(user);
+                if (!currentRoles.Contains(dto.Role))
+                {
+                    var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                    if (!removeResult.Succeeded)
+                    {
+                        return new DataTransferObject<List<User>>
+                        {
+                            Message = "Failed to remove old roles",
+                            Data = null
+                        };
+                    }
+
+                    var addRoleResult = await _userManager.AddToRoleAsync(user, dto.Role);
+                    if (!addRoleResult.Succeeded)
+                    {
+                        return new DataTransferObject<List<User>>
+                        {
+                            Message = "Failed to add new role",
+                            Data = null
+                        };
+                    }
+                }
+
+                // ✅ Final save
+                var updateResult = await _userManager.UpdateAsync(user);
+                if (!updateResult.Succeeded)
+                {
+                    return new DataTransferObject<List<User>>
+                    {
+                        Message = "Failed to update user",
+                        Data = null
+                    };
+                }
+
+                // ✅ Fetch non-admin users
+                var allUsers = await _userManager.Users.ToListAsync();
+                var nonAdminUsers = new List<User>();
+
+                foreach (var u in allUsers)
+                {
+                    var roles = await _userManager.GetRolesAsync(u);
+                    if (!roles.Contains("Admin"))
+                    {
+                        nonAdminUsers.Add(u);
+                    }
+                }
+
+                return new DataTransferObject<List<User>>
+                {
+                    Message = "User updated successfully",
+                    Data = nonAdminUsers
+                };
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return new StatusCodeResult(500); // Internal Server Error
+                return new DataTransferObject<List<User>>
+                {
+                    Message = "An error occurred while updating the user",
+                    Data = null
+                };
             }
         }
+
 
         public async Task<List<UserViewDto>> GetAllUsersAsync()
         {
