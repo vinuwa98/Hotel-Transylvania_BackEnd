@@ -5,15 +5,9 @@ namespace HmsBackend.Models
 {
     public class User : IdentityUser
     {
-        internal string FullName;
-        internal string Status;
-        public required string Role { get; set; }
+        public string? Status { get; set; }
 
         public bool IsActive { get; set; } = true;
-
-        //public int id { get; set; }
-
-        // limit to 50 characters
 
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
@@ -31,9 +25,6 @@ namespace HmsBackend.Models
 
         [Required]
         public required string Role { get; set; }
-
-        [Required]
-        public required string Status { get; set; }
 
         public List<Room>? Rooms { get; set; } = new();
         public List<Complaint>? Complaints { get; set; } = new();
