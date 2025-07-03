@@ -59,7 +59,6 @@ namespace HmsBackend.Services
                     .Where(u => u.Role != "Admin")
                     .Select(u => new UserViewDto
                     {
-                        FullName = u.FullName,
                         FirstName = u.FirstName,
                         LastName = u.LastName,
                         Address = u.Address,
@@ -78,6 +77,33 @@ namespace HmsBackend.Services
             catch (Exception ex)
             {
                 throw new Exception("Unexpected error occurred while adding user.", ex);
+            }
+        }
+
+        public DataTransferObject<List<UserViewDto>> GetAllSupervisors()
+        {
+            try
+            {
+                var users = _userManager.Users
+                    .Where(u => u.Role == "Supervisor")
+                    .Select(u => new UserViewDto
+                    {
+                        Id = u.Id,
+                        FirstName = u.FirstName,
+                        LastName = u.LastName,
+                        Address = u.Address,
+                        Role = u.Role,
+                        ContactNumber = u.ContactNumber,
+                        Status = u.Status,
+                        FullName = u.FirstName + " " + u.LastName
+                    })
+                    .ToList();
+
+                return new DataTransferObject<List<UserViewDto>> { Message = null, Data = users };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Unexpected error occurred while fetching all supervisors", ex);
             }
         }
 
@@ -256,6 +282,7 @@ namespace HmsBackend.Services
                 ContactNumber = registerRequest.ContactNumber,
                 SupervisorID = registerRequest.SupervisorID,
                 Role = registerRequest.Role,
+                Status = "Active"
             };
         }
 

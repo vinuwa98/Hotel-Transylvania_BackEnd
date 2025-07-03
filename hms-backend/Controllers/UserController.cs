@@ -1,6 +1,7 @@
 ﻿using HmsBackend.DTOs;
 using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HmsBackend.Controllers
@@ -24,13 +25,13 @@ namespace HmsBackend.Controllers
                 var result = await _userService.LoginAsync(user);
                 return Ok(result);
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException ex)
             {
-                return Unauthorized("Invalid credentials.");
+                return Unauthorized(ex.Message);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, "An unexpected error occurred.");
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
 
@@ -51,9 +52,25 @@ namespace HmsBackend.Controllers
                 var allUsers = await _userService.AddUserAsync(registerRequest);
                 return Ok(allUsers);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "User addition failed due to an unexpected error.");
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [Authorize(Policy = "AdminOnly")]
+        [Route("get-supervisors")]
+        [HttpGet]
+        public IActionResult GetAllSupervisors()
+        {
+            try
+            {
+                var allUsers = _userService.GetAllSupervisors();
+                return Ok(allUsers);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
 
@@ -70,9 +87,9 @@ namespace HmsBackend.Controllers
                 var result = await _userService.UpdateUserAsync(dto);
                 return Ok(result);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while updating the user.");
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
 
@@ -106,6 +123,5 @@ namespace HmsBackend.Controllers
 
             return Ok(new { message = "User deactivated successfully" });
         }
-
     }
 }

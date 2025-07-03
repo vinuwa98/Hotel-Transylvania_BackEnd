@@ -11,6 +11,7 @@ namespace HmsBackend.Services.Interfaces
         Task<DataTransferObject<LoginSuccessDto>> LoginAsync(UserDto user);
         Task<DataTransferObject<string>> UpdateUserAsync(UpdateUserDto updateUserDto);
         Task<List<UserViewDto>> GetAllUsersAsync();
+        DataTransferObject<List<UserViewDto>> GetAllSupervisors();
 
         Task<bool> DeactivateUserAsync(string userId);
     }

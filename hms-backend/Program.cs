@@ -140,14 +140,13 @@ async Task SeedRolesAndAdminAsync(IServiceProvider services)
         var adminUser = new User
         {
             UserName = adminEmail,
-            NormalizedUserName = adminEmail.ToUpper(),
             Email = adminEmail,
             NormalizedEmail = adminEmail.ToUpper(),
-            EmailConfirmed = true,
             DOB = new DateTime(2002, 2, 2),
             FirstName = "Admin",
             LastName = "User",
-            Role = "Admin"
+            Role = "Admin",
+            Status = "Active"
         };
 
 

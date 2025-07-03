@@ -39,6 +39,7 @@ namespace HmsBackend.Repositories
                     ContactNumber = registerRequest.ContactNumber,
                     SupervisorID = registerRequest.SupervisorID,
                     Role = registerRequest.Role,
+                    Status = "Active"
                 };
 
                 var result = await _userManager.CreateAsync(identityUser, registerRequest.Password);
