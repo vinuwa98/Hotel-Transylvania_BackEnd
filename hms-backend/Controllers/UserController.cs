@@ -77,14 +77,13 @@ namespace HmsBackend.Controllers
         [Authorize(Policy = "AdminOnly")]
         [Route("update-user")]
         [HttpPut]
-        public async Task<IActionResult> UpdateUser(UpdateUserDto dto)
+        public async Task<IActionResult> UpdateUser(UpdateUserDto updateUserDto)
         {
-            if (dto == null)
-                return BadRequest("Invalid user data.");
+            var result = await _userService.UpdateUserAsync(updateUserDto);
 
-            try
+            // Fix: Explicitly convert the DataTransferObject to an IActionResult
+            if (result.Data != null)
             {
-                var result = await _userService.UpdateUserAsync(dto);
                 return Ok(result);
             }
             catch (Exception ex)

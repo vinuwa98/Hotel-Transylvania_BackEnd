@@ -7,10 +7,10 @@ namespace HmsBackend.Services.Interfaces
 {
     public interface IUserService
     {
-        Task<DataTransferObject<List<UserViewDto>>> AddUserAsync(RegistrationDto registerRequest);
+        Task<DataTransferObject<List<User>>> UpdateUserAsync(UpdateUserDto updateUserDto);
         Task<bool> IsUserAlreadyExists(string email);
         Task<DataTransferObject<LoginSuccessDto>> LoginAsync(UserDto user);
-        Task<DataTransferObject<string>> UpdateUserAsync(UpdateUserDto updateUserDto);
+        Task<DataTransferObject<List<UserViewDto>>> AddUserAsync(RegistrationDto registerRequest); // Corrected this line
         Task<List<UserViewDto>> GetAllUsersAsync();
         DataTransferObject<List<SupervisorInfoDto>> GetAllSupervisors();
 

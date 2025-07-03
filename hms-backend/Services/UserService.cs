@@ -109,8 +109,15 @@ namespace HmsBackend.Services
             {
                 var user = await _userManager.FindByIdAsync(dto.UserId);
                 if (user == null)
-                    throw new InvalidOperationException("User not found.");
+                {
+                    return new DataTransferObject<List<User>>
+                    {
+                        Message = "User not found",
+                        Data = null
+                    };
+                }
 
+                // 🔄 Update user fields
                 user.Email = dto.Email;
                 user.UserName = dto.Email;
                 user.ContactNumber = dto.ContactNumber;
@@ -119,38 +126,84 @@ namespace HmsBackend.Services
                 user.Address = dto.Address;
                 user.DOB = dto.DOB;
 
+                // 🔐 Update password
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var passwordResult = await _userManager.ResetPasswordAsync(user, token, dto.Password);
                 if (!passwordResult.Succeeded)
-                    throw new InvalidOperationException("Password reset failed.");
+                {
+                    return new DataTransferObject<List<User>>
+                    {
+                        Message = "Password update failed",
+                        Data = null
+                    };
+                }
 
+                // 🔁 Update roles if needed
                 var currentRoles = await _userManager.GetRolesAsync(user);
                 if (!currentRoles.Contains(dto.Role))
                 {
                     var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
                     if (!removeResult.Succeeded)
-                        throw new InvalidOperationException("Removing old roles failed.");
+                    {
+                        return new DataTransferObject<List<User>>
+                        {
+                            Message = "Failed to remove old roles",
+                            Data = null
+                        };
+                    }
 
-                    var addResult = await _userManager.AddToRoleAsync(user, dto.Role);
-                    if (!addResult.Succeeded)
-                        throw new InvalidOperationException("Assigning new role failed.");
+                    var addRoleResult = await _userManager.AddToRoleAsync(user, dto.Role);
+                    if (!addRoleResult.Succeeded)
+                    {
+                        return new DataTransferObject<List<User>>
+                        {
+                            Message = "Failed to add new role",
+                            Data = null
+                        };
+                    }
                 }
 
+                // ✅ Final save
                 var updateResult = await _userManager.UpdateAsync(user);
                 if (!updateResult.Succeeded)
-                    throw new InvalidOperationException("User update failed.");
+                {
+                    return new DataTransferObject<List<User>>
+                    {
+                        Message = "Failed to update user",
+                        Data = null
+                    };
+                }
 
-                return new DataTransferObject<string> { Message = "User updated successfully", Data = user.Id };
-            }
-            catch (InvalidOperationException ex)
-            {
-                throw new InvalidOperationException($"User update failed: {ex.Message}");
+                // ✅ Fetch non-admin users
+                var allUsers = await _userManager.Users.ToListAsync();
+                var nonAdminUsers = new List<User>();
+
+                foreach (var u in allUsers)
+                {
+                    var roles = await _userManager.GetRolesAsync(u);
+                    if (!roles.Contains("Admin"))
+                    {
+                        nonAdminUsers.Add(u);
+                    }
+                }
+
+                return new DataTransferObject<List<User>>
+                {
+                    Message = "User updated successfully",
+                    Data = nonAdminUsers
+                };
             }
             catch (Exception ex)
             {
-                throw new Exception("Unexpected error occurred while updating user.", ex);
+                Console.WriteLine(ex.Message);
+                return new DataTransferObject<List<User>>
+                {
+                    Message = "An error occurred while updating the user",
+                    Data = null
+                };
             }
         }
+
 
         public async Task<List<UserViewDto>> GetAllUsersAsync()
         {
