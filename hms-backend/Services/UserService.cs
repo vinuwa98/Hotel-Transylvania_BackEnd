@@ -1,4 +1,5 @@
-﻿using HmsBackend.DTOs;
+﻿using hms_backend.DTOs;
+using HmsBackend.DTOs;
 using HmsBackend.Models;
 using HmsBackend.Repositories.Interfaces;
 using HmsBackend.Services.Interfaces;
@@ -80,26 +81,21 @@ namespace HmsBackend.Services
             }
         }
 
-        public DataTransferObject<List<UserViewDto>> GetAllSupervisors()
+        public DataTransferObject<List<SupervisorInfoDto>> GetAllSupervisors()
         {
             try
             {
-                var users = _userManager.Users
+                var supervisors = _userManager.Users
                     .Where(u => u.Role == "Supervisor")
-                    .Select(u => new UserViewDto
+                    .Select(u => new SupervisorInfoDto
                     {
-                        Id = u.Id,
+                        SupervisorId = u.Id, // TODO: don't use db id here
                         FirstName = u.FirstName,
                         LastName = u.LastName,
-                        Address = u.Address,
-                        Role = u.Role,
-                        ContactNumber = u.ContactNumber,
-                        Status = u.Status,
-                        FullName = u.FirstName + " " + u.LastName
                     })
                     .ToList();
 
-                return new DataTransferObject<List<UserViewDto>> { Message = null, Data = users };
+                return new DataTransferObject<List<SupervisorInfoDto>> { Message = null, Data = supervisors };
             }
             catch (Exception ex)
             {
