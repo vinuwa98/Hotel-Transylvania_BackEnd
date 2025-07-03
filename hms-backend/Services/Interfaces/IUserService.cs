@@ -1,4 +1,5 @@
-﻿using HmsBackend.DTOs;
+﻿using hms_backend.DTOs;
+using HmsBackend.DTOs;
 using HmsBackend.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +12,7 @@ namespace HmsBackend.Services.Interfaces
         Task<DataTransferObject<LoginSuccessDto>> LoginAsync(UserDto user);
         Task<DataTransferObject<string>> UpdateUserAsync(UpdateUserDto updateUserDto);
         Task<List<UserViewDto>> GetAllUsersAsync();
-        DataTransferObject<List<UserViewDto>> GetAllSupervisors();
+        DataTransferObject<List<SupervisorInfoDto>> GetAllSupervisors();
 
         Task<bool> DeactivateUserAsync(string userId);
     }
