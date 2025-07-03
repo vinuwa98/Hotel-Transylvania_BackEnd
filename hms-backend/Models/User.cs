@@ -1,23 +1,14 @@
-﻿using HmsBackend.Models;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace HmsBackend.Models
 {
     public class User : IdentityUser
     {
-        internal string FullName;
-        internal string Status;
-        public required string Role { get; set; }
-
-        //public int id { get; set; }
-
-        // limit to 50 characters
-
-        public string? FirstName { get; set; }
+        [Required]
+        public required string FirstName { get; set; }
         public string? LastName { get; set; }
 
-        [Required]
         [DataType(DataType.Date)]
         public DateTime? DOB { get; set; }
 
@@ -29,7 +20,12 @@ namespace HmsBackend.Models
 
         public string? SupervisorID { get; set; }
 
-      
+        [Required]
+        public required string Role { get; set; }
+
+        [Required]
+        public required string Status { get; set; }
+
         public List<Room>? Rooms { get; set; } = new();
         public List<Complaint>? Complaints { get; set; } = new();
         public List<JobUser>? JobUsers { get; set; } = new();

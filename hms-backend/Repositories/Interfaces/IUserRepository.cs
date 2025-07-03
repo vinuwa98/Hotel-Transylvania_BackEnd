@@ -15,12 +15,9 @@ namespace HmsBackend.Repositories.Interfaces
 
         Task<IdentityResult> UpdateUserAsync(UpdateUserDto updateDto);
 
-        Task<List<UserViewDto>> GetAllUsersAsync();
+        //Task<List<UserViewDto>> GetAllUsersAsync();
 
-        //Task<User?> FindUserByIdAsync(string userId);
-        //Task<IdentityResult> UpdateUserStatusAsync(User user);
-
-
+        //Task<bool> DeactivateUserAsync(string userId);
     }
 }
 

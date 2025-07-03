@@ -121,7 +121,7 @@ async Task SeedRolesAndAdminAsync(IServiceProvider services)
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-    await context.Database.MigrateAsync();
+    //await context.Database.MigrateAsync();
     //await context.Database.EnsureDeletedAsync(); // Optional: Remove if you want to persist data
     //await context.Database.EnsureCreatedAsync();
 
@@ -140,14 +140,13 @@ async Task SeedRolesAndAdminAsync(IServiceProvider services)
         var adminUser = new User
         {
             UserName = adminEmail,
-            NormalizedUserName = adminEmail.ToUpper(),
             Email = adminEmail,
             NormalizedEmail = adminEmail.ToUpper(),
-            EmailConfirmed = true,
             DOB = new DateTime(2002, 2, 2),
             FirstName = "Admin",
             LastName = "User",
-            Role = "Admin"
+            Role = "Admin",
+            Status = "Active"
         };
 
 

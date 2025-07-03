@@ -4,19 +4,23 @@ using HmsBackend.Repositories.Interfaces;
 using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
 namespace HmsBackend.Services
 {
-    public class UserService(UserManager<User> userManager, IUserRepository userRepository, IConfiguration configuration) : IUserService
+    public class UserService(UserManager<User> userManager, IUserRepository userRepository, IConfiguration configuration,AppDbContext appDbContext) : IUserService
     {
         private readonly IConfiguration _configuration = configuration;
         private readonly IUserRepository _userRepository = userRepository; // TODO: remove this
 
         private readonly UserManager<User> _userManager = userManager;
+        private readonly AppDbContext _context = appDbContext;
+      
 
         public async Task<DataTransferObject<LoginSuccessDto>> LoginAsync(UserDto user)
         {
@@ -55,7 +59,6 @@ namespace HmsBackend.Services
                     .Where(u => u.Role != "Admin")
                     .Select(u => new UserViewDto
                     {
-                        FullName = u.FullName,
                         FirstName = u.FirstName,
                         LastName = u.LastName,
                         Address = u.Address,
@@ -77,33 +80,116 @@ namespace HmsBackend.Services
             }
         }
 
-        public async Task<IActionResult> UpdateUserAsync(UpdateUserDto dto)
+        public DataTransferObject<List<UserViewDto>> GetAllSupervisors()
         {
             try
             {
-                if (dto == null) return new BadRequestResult();
+                var users = _userManager.Users
+                    .Where(u => u.Role == "Supervisor")
+                    .Select(u => new UserViewDto
+                    {
+                        Id = u.Id,
+                        FirstName = u.FirstName,
+                        LastName = u.LastName,
+                        Address = u.Address,
+                        Role = u.Role,
+                        ContactNumber = u.ContactNumber,
+                        Status = u.Status,
+                        FullName = u.FirstName + " " + u.LastName
+                    })
+                    .ToList();
 
-                var result = await _userRepository.UpdateUserAsync(dto);
-
-                if (result.Succeeded)
-                {
-                    return new OkObjectResult("User updated successfully");
-                }
-                else
-                {
-                    return new BadRequestObjectResult(result.Errors);
-                }
+                return new DataTransferObject<List<UserViewDto>> { Message = null, Data = users };
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                return new StatusCodeResult(500); // Internal Server Error
+                throw new Exception("Unexpected error occurred while fetching all supervisors", ex);
+            }
+        }
+
+        public async Task<DataTransferObject<string>> UpdateUserAsync(UpdateUserDto dto)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(dto.UserId);
+                if (user == null)
+                    throw new InvalidOperationException("User not found.");
+
+                user.Email = dto.Email;
+                user.UserName = dto.Email;
+                user.ContactNumber = dto.ContactNumber;
+                user.FirstName = dto.FirstName;
+                user.LastName = dto.LastName;
+                user.Address = dto.Address;
+                user.DOB = dto.DOB;
+
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var passwordResult = await _userManager.ResetPasswordAsync(user, token, dto.Password);
+                if (!passwordResult.Succeeded)
+                    throw new InvalidOperationException("Password reset failed.");
+
+                var currentRoles = await _userManager.GetRolesAsync(user);
+                if (!currentRoles.Contains(dto.Role))
+                {
+                    var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                    if (!removeResult.Succeeded)
+                        throw new InvalidOperationException("Removing old roles failed.");
+
+                    var addResult = await _userManager.AddToRoleAsync(user, dto.Role);
+                    if (!addResult.Succeeded)
+                        throw new InvalidOperationException("Assigning new role failed.");
+                }
+
+                var updateResult = await _userManager.UpdateAsync(user);
+                if (!updateResult.Succeeded)
+                    throw new InvalidOperationException("User update failed.");
+
+                return new DataTransferObject<string> { Message = "User updated successfully", Data = user.Id };
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new InvalidOperationException($"User update failed: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Unexpected error occurred while updating user.", ex);
             }
         }
 
         public async Task<List<UserViewDto>> GetAllUsersAsync()
         {
-            return await _userRepository.GetAllUsersAsync();
+           
+            try
+            {
+                // Get the Admin Role ID
+                var adminRoleId = await _context.Roles
+                    .Where(r => r.Name == "Admin")
+                    .Select(r => r.Id)
+                    .FirstOrDefaultAsync();
+
+                // Fetch non-admin users using joins
+                var users = await (
+                    from user in _context.Users
+                    join userRole in _context.UserRoles on user.Id equals userRole.UserId
+                    join role in _context.Roles on userRole.RoleId equals role.Id
+                    where userRole.RoleId != adminRoleId
+                    select new UserViewDto
+                    {
+                        Id = user.Id,
+                        FullName = (user.FirstName + " " + user.LastName).Trim(),
+                        Role = role.Name,
+                        Address = user.Address,
+                        ContactNumber = user.ContactNumber,
+                        Status = user.EmailConfirmed ? "Active" : "Inactive"
+                    }).ToListAsync();
+
+                return users;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error fetching users: " + ex.Message);
+                return new List<UserViewDto>();
+            }
         }
 
         public async Task<bool> IsUserAlreadyExists(string email)
@@ -196,7 +282,21 @@ namespace HmsBackend.Services
                 ContactNumber = registerRequest.ContactNumber,
                 SupervisorID = registerRequest.SupervisorID,
                 Role = registerRequest.Role,
+                Status = "Active"
             };
+        }
+
+        public async Task<bool> DeactivateUserAsync(string userId)
+        {
+    
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return false;
+
+            user.EmailConfirmed = !user.EmailConfirmed;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            return result.Succeeded;
         }
     }
 }
