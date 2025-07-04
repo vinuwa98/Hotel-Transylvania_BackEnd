@@ -1,15 +1,22 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HmsBackend.Models
 {
     public class User : IdentityUser
     {
-        //public string? Status { get; set; }
-
         public bool IsActive { get; set; } = true;
 
+        //[Key]
+        //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        //public int UserId { get; set; }
+
+        [Key]
+        public required string UserCode { get; set; }
+
         public string? FirstName { get; set; }
+
         public string? LastName { get; set; }
 
         [DataType(DataType.Date)]

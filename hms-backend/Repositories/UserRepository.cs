@@ -30,7 +30,8 @@ namespace HmsBackend.Repositories
                     Address = registerRequest.Address,
                     ContactNumber = registerRequest.ContactNumber,
                     SupervisorID = registerRequest.SupervisorID,
-                    Role = registerRequest.Role
+                    Role = registerRequest.Role,
+                    UserCode = "12345"
                 };
 
                 var result = await _userManager.CreateAsync(identityUser, registerRequest.Password);

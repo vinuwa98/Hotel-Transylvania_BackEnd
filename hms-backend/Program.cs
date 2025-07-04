@@ -146,7 +146,8 @@ async Task SeedRolesAndAdminAsync(IServiceProvider services)
             FirstName = "Admin",
             LastName = "User",
             Role = "Admin",
-            IsActive = true
+            IsActive = true,
+            UserCode = Guid.NewGuid().ToString()
         };
 
 

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace HmsBackend.Migrations
+namespace hms_backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
@@ -196,10 +196,10 @@ namespace HmsBackend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Status")
+                    b.Property<string>("SupervisorID")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("SupervisorID")
+                    b.Property<string>("UserCode")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserName")

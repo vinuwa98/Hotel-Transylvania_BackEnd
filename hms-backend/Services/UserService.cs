@@ -65,7 +65,7 @@ namespace HmsBackend.Services
                         Address = u.Address,
                         Role = u.Role,
                         ContactNumber = u.ContactNumber,
-                        Status = u.IsActive ? "Active" : "Inactive"
+                        Status = u.IsActive ? "Active" : "Inactive",
                     })
                     .ToList();
 
@@ -89,7 +89,7 @@ namespace HmsBackend.Services
                     .Where(u => u.Role == "Supervisor")
                     .Select(u => new SupervisorInfoDto
                     {
-                        SupervisorId = u.Id, // TODO: don't use db id here
+                        SupervisorId = u.UserCode.ToString(),
                         FirstName = u.FirstName,
                         LastName = u.LastName,
                     })
@@ -330,7 +330,8 @@ namespace HmsBackend.Services
                 Address = registerRequest.Address,
                 ContactNumber = registerRequest.ContactNumber,
                 SupervisorID = registerRequest.SupervisorID,
-                Role = registerRequest.Role
+                Role = registerRequest.Role,
+                UserCode = Guid.NewGuid().ToString(),
             };
         }
 
