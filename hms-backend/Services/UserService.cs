@@ -1,5 +1,6 @@
 ﻿using hms_backend.DTOs;
 using HmsBackend.DTOs;
+using HmsBackend.DTOs;
 using HmsBackend.Models;
 using HmsBackend.Repositories.Interfaces;
 using HmsBackend.Services.Interfaces;
@@ -14,10 +15,11 @@ using System.Text;
 
 namespace HmsBackend.Services
 {
-    public class UserService(UserManager<User> userManager, IUserRepository userRepository, IConfiguration configuration,AppDbContext appDbContext) : IUserService
+    public class UserService(UserManager<User> userManager, IUserRepository userRepository, IConfiguration configuration, AppDbContext appDbContext, IEmailService emailService) : IUserService
     {
         private readonly IConfiguration _configuration = configuration;
         private readonly IUserRepository _userRepository = userRepository; // TODO: remove this
+        private readonly IEmailService _emailService = emailService;
 
         private readonly UserManager<User> _userManager = userManager;
         private readonly AppDbContext _context = appDbContext;
@@ -56,6 +58,8 @@ namespace HmsBackend.Services
 
                 await _userManager.AddToRoleAsync(newUser, registerRequest.Role);
 
+                await SendResetPasswordEmailAsync(registerRequest.Email);
+
                 var users = _userManager.Users
                     .Where(u => u.Role != "Admin")
                     .Select(u => new UserViewDto
@@ -65,7 +69,7 @@ namespace HmsBackend.Services
                         Address = u.Address,
                         Role = u.Role,
                         ContactNumber = u.ContactNumber,
-                        Status = u.Status
+                        Status = u.IsActive ? "Active" : "Inactive",
                     })
                     .ToList();
 
@@ -89,7 +93,7 @@ namespace HmsBackend.Services
                     .Where(u => u.Role == "Supervisor")
                     .Select(u => new SupervisorInfoDto
                     {
-                        SupervisorId = u.Id, // TODO: don't use db id here
+                        SupervisorId = u.UserCode.ToString(),
                         FirstName = u.FirstName,
                         LastName = u.LastName,
                     })
@@ -103,14 +107,60 @@ namespace HmsBackend.Services
             }
         }
 
-        public async Task<DataTransferObject<string>> UpdateUserAsync(UpdateUserDto dto)
+        public async Task<DataTransferObject<bool>> SendResetPasswordEmailAsync(string email)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                    return new DataTransferObject<bool> { Data = false, Message = "User not found" };
+
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var link = $"http://localhost:5173/reset-password?token={Uri.EscapeDataString(token)}&email={email}";
+                await _emailService.SendEmailAsync(email, "Reset Password", $"Go to reset: \"{link}\"");
+
+                return new DataTransferObject<bool> { Data = true, Message = "Reset email sent!" };
+            }
+            catch
+            {
+                throw new InvalidOperationException("Email sending unsuccessful!");
+            }
+        }
+
+        public async Task<DataTransferObject<bool>> ResetPasswordAsync(ResetPasswordDto model)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                    return new DataTransferObject<bool> { Message = "User not found", Data = false };
+
+                var result = await _userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
+                return result.Succeeded
+                    ? new DataTransferObject<bool> { Message = "Password reset successful", Data = true }
+                    : new DataTransferObject<bool> { Message = "User not found", Data = false };
+            }
+            catch
+            {
+                throw new InvalidOperationException("Password reset operating failed!");
+            }
+        }
+
+        public async Task<DataTransferObject<List<User>>> UpdateUserAsync(UpdateUserDto dto)
         {
             try
             {
                 var user = await _userManager.FindByIdAsync(dto.UserId);
                 if (user == null)
-                    throw new InvalidOperationException("User not found.");
+                {
+                    return new DataTransferObject<List<User>>
+                    {
+                        Message = "User not found",
+                        Data = null
+                    };
+                }
 
+                //Update user fields
                 user.Email = dto.Email;
                 user.UserName = dto.Email;
                 user.ContactNumber = dto.ContactNumber;
@@ -119,38 +169,84 @@ namespace HmsBackend.Services
                 user.Address = dto.Address;
                 user.DOB = dto.DOB;
 
+                //Update password
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var passwordResult = await _userManager.ResetPasswordAsync(user, token, dto.Password);
                 if (!passwordResult.Succeeded)
-                    throw new InvalidOperationException("Password reset failed.");
+                {
+                    return new DataTransferObject<List<User>>
+                    {
+                        Message = "Password update failed",
+                        Data = null
+                    };
+                }
 
+                //Update roles if needed
                 var currentRoles = await _userManager.GetRolesAsync(user);
                 if (!currentRoles.Contains(dto.Role))
                 {
                     var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
                     if (!removeResult.Succeeded)
-                        throw new InvalidOperationException("Removing old roles failed.");
+                    {
+                        return new DataTransferObject<List<User>>
+                        {
+                            Message = "Failed to remove old roles",
+                            Data = null
+                        };
+                    }
 
-                    var addResult = await _userManager.AddToRoleAsync(user, dto.Role);
-                    if (!addResult.Succeeded)
-                        throw new InvalidOperationException("Assigning new role failed.");
+                    var addRoleResult = await _userManager.AddToRoleAsync(user, dto.Role);
+                    if (!addRoleResult.Succeeded)
+                    {
+                        return new DataTransferObject<List<User>>
+                        {
+                            Message = "Failed to add new role",
+                            Data = null
+                        };
+                    }
                 }
 
+                //Final save
                 var updateResult = await _userManager.UpdateAsync(user);
                 if (!updateResult.Succeeded)
-                    throw new InvalidOperationException("User update failed.");
+                {
+                    return new DataTransferObject<List<User>>
+                    {
+                        Message = "Failed to update user",
+                        Data = null
+                    };
+                }
 
-                return new DataTransferObject<string> { Message = "User updated successfully", Data = user.Id };
-            }
-            catch (InvalidOperationException ex)
-            {
-                throw new InvalidOperationException($"User update failed: {ex.Message}");
+                // ✅ Fetch non-admin users
+                var allUsers = await _userManager.Users.ToListAsync();
+                var nonAdminUsers = new List<User>();
+
+                foreach (var u in allUsers)
+                {
+                    var roles = await _userManager.GetRolesAsync(u);
+                    if (!roles.Contains("Admin"))
+                    {
+                        nonAdminUsers.Add(u);
+                    }
+                }
+
+                return new DataTransferObject<List<User>>
+                {
+                    Message = "User updated successfully",
+                    Data = nonAdminUsers
+                };
             }
             catch (Exception ex)
             {
-                throw new Exception("Unexpected error occurred while updating user.", ex);
+                Console.WriteLine(ex.Message);
+                return new DataTransferObject<List<User>>
+                {
+                    Message = "An error occurred while updating the user",
+                    Data = null
+                };
             }
         }
+
 
         public async Task<List<UserViewDto>> GetAllUsersAsync()
         {
@@ -176,7 +272,7 @@ namespace HmsBackend.Services
                         Role = role.Name,
                         Address = user.Address,
                         ContactNumber = user.ContactNumber,
-                        Status = user.EmailConfirmed ? "Active" : "Inactive"
+                        Status = user.IsActive ? "Active" : "Inactive"
                     }).ToListAsync();
 
                 return users;
@@ -278,21 +374,58 @@ namespace HmsBackend.Services
                 ContactNumber = registerRequest.ContactNumber,
                 SupervisorID = registerRequest.SupervisorID,
                 Role = registerRequest.Role,
-                Status = "Active"
+                UserCode = Guid.NewGuid().ToString(),
             };
         }
 
         public async Task<bool> DeactivateUserAsync(string userId)
         {
-    
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null) return false;
+            try
+            {
+                var user = await _context.Users
+                    .Where (u => u.Id == userId)
+                    .FirstOrDefaultAsync();
 
-            user.EmailConfirmed = !user.EmailConfirmed;
+                if (user == null) return false;
 
-            var result = await _userManager.UpdateAsync(user);
+                user.IsActive = false;
 
-            return result.Succeeded;
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+        }
+
+        public async Task<bool> ActivateUserAsync(string userId)
+        {
+            try
+            {
+                var user = await _context.Users
+                    .Where(u => u.Id == userId)
+                    .FirstOrDefaultAsync();
+
+                if (user == null) return false;
+
+
+                user.IsActive = true;
+
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
         }
     }
 }

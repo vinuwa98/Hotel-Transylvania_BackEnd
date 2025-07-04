@@ -74,23 +74,57 @@ namespace HmsBackend.Controllers
             }
         }
 
+        [Route("forgot-password")]
+        [HttpPost]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto forgotPassword)
+        {
+            var result = await _userService.SendResetPasswordEmailAsync(forgotPassword.Email);
+            if (result.Data)
+            {
+                return Ok(result.Message);
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, result.Message);
+            }
+        }
+
+        [Route("reset-password")]
+        [HttpGet]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDto model)
+        {
+            var result = await _userService.ResetPasswordAsync(model);
+            if (result.Data)
+            {
+                return Ok(result.Message);
+            }
+            else
+            {
+                return BadRequest(result.Message);
+            }
+        }
+
         [Authorize(Policy = "AdminOnly")]
         [Route("update-user")]
         [HttpPut]
-        public async Task<IActionResult> UpdateUser(UpdateUserDto dto)
+        public async Task<IActionResult> UpdateUser(UpdateUserDto updateUserDto)
         {
-            if (dto == null)
-                return BadRequest("Invalid user data.");
+            var result = await _userService.UpdateUserAsync(updateUserDto);
 
             try
             {
-                var result = await _userService.UpdateUserAsync(dto);
-                return Ok(result);
+                // Fix: Explicitly convert the DataTransferObject to an IActionResult
+                if (result.Data != null)
+                {
+                    return Ok(result);
+                }
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
+
+            return null;
         }
 
 
@@ -114,8 +148,8 @@ namespace HmsBackend.Controllers
 
 
         [Authorize(Policy = "AdminOnly")]
-        [HttpPut("deactivate-user/{userId}")]
-        public async Task<IActionResult> DeactivateUser(string userId)
+        [HttpPut("deactivate-user")]
+        public async Task<IActionResult> DeactivateUser([FromBody] string userId)
         {
             var success = await _userService.DeactivateUserAsync(userId);
             if (!success)
@@ -123,5 +157,17 @@ namespace HmsBackend.Controllers
 
             return Ok(new { message = "User deactivated successfully" });
         }
+
+        [Authorize(Policy = "AdminOnly")]
+        [HttpPut("activate-user")]
+        public async Task<IActionResult> ActivateUser([FromBody] string userId)
+        {
+            var success = await _userService.ActivateUserAsync(userId);
+            if (!success)
+                return NotFound(new { message = "User not found or already active" });
+
+            return Ok(new { message = "User activated successfully" });
+        }
+
     }
 }

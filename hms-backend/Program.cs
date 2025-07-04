@@ -52,6 +52,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IEmailService, EmailService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddCors(options =>
 {
@@ -146,7 +147,8 @@ async Task SeedRolesAndAdminAsync(IServiceProvider services)
             FirstName = "Admin",
             LastName = "User",
             Role = "Admin",
-            Status = "Active"
+            IsActive = true,
+            UserCode = Guid.NewGuid().ToString()
         };
 
 

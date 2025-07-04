@@ -170,8 +170,10 @@ namespace hms_backend.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("FirstName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
@@ -194,11 +196,10 @@ namespace hms_backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
+                    b.Property<string>("SupervisorID")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("SupervisorID")
+                    b.Property<string>("UserCode")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserName")

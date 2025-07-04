@@ -8,21 +8,24 @@ namespace HmsBackend.Services
     {
         private readonly IConfiguration _config = config;
 
-        public async Task SendEmailAsync(string toEmail, string subject, string message)
+        public async Task SendEmailAsync(string toEmail, string subject, string body)
         {
-            var smtpClient = new SmtpClient("smtp.example.com")
+            var smtp = new SmtpClient(_config["EmailSettings:SmtpServer"])
             {
-                Port = 587,
-                Credentials = new NetworkCredential("your-email@example.com", "your-password"),
+                Port = int.Parse(_config["EmailSettings:Port"]),
+                Credentials = new NetworkCredential(_config["EmailSettings:Username"], _config["EmailSettings:Password"]),
                 EnableSsl = true
             };
 
-            var mailMessage = new MailMessage("your-email@example.com", toEmail, subject, message)
+            var mail = new MailMessage
             {
+                From = new MailAddress(_config["EmailSettings:SenderEmail"], _config["EmailSettings:SenderName"]),
+                Subject = subject,
+                Body = body,
                 IsBodyHtml = true
             };
-
-            await smtpClient.SendMailAsync(mailMessage);
+            mail.To.Add(toEmail);
+            await smtp.SendMailAsync(mail);
         }
     }
 }
