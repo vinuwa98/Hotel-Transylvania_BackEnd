@@ -18,7 +18,7 @@ Authorization: {{$apiKey}}
 Content-Type: application/json
 
 {
-  "email": "john.doe@example.com",
+  "email": "2000testzigma@gmail.com",
   "firstName": "John",
   "lastName": "Doe",
   "dob": "2025-06-30",

@@ -1,4 +1,4 @@
-﻿using hms_backend.DTOs;
+﻿using HmsBackend.DTOs;
 using HmsBackend.DTOs;
 using HmsBackend.Models;
 using HmsBackend.Repositories.Interfaces;
@@ -14,10 +14,11 @@ using System.Text;
 
 namespace HmsBackend.Services
 {
-    public class UserService(UserManager<User> userManager, IUserRepository userRepository, IConfiguration configuration,AppDbContext appDbContext) : IUserService
+    public class UserService(UserManager<User> userManager, IUserRepository userRepository, IConfiguration configuration, AppDbContext appDbContext, IEmailService emailService) : IUserService
     {
         private readonly IConfiguration _configuration = configuration;
         private readonly IUserRepository _userRepository = userRepository; // TODO: remove this
+        private readonly IEmailService _emailService = emailService;
 
         private readonly UserManager<User> _userManager = userManager;
         private readonly AppDbContext _context = appDbContext;
@@ -55,6 +56,8 @@ namespace HmsBackend.Services
                     throw new InvalidOperationException("Failed to create user.");
 
                 await _userManager.AddToRoleAsync(newUser, registerRequest.Role);
+
+                await SendResetPasswordEmailAsync(registerRequest.Email);
 
                 var users = _userManager.Users
                     .Where(u => u.Role != "Admin")
@@ -100,6 +103,45 @@ namespace HmsBackend.Services
             catch (Exception ex)
             {
                 throw new Exception("Unexpected error occurred while fetching all supervisors", ex);
+            }
+        }
+
+        public async Task<DataTransferObject<bool>> SendResetPasswordEmailAsync(string email)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                    return new DataTransferObject<bool> { Data = false, Message = "User not found" };
+
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var link = $"http://localhost:5173/reset-password?token={Uri.EscapeDataString(token)}&email={email}";
+                await _emailService.SendEmailAsync(email, "Reset Password", $"Go to reset: \"{link}\"");
+
+                return new DataTransferObject<bool> { Data = true, Message = "Reset email sent!" };
+            }
+            catch
+            {
+                throw new InvalidOperationException("Email sending unsuccessful!");
+            }
+        }
+
+        public async Task<DataTransferObject<bool>> ResetPasswordAsync(ResetPasswordDto model)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                    return new DataTransferObject<bool> { Message = "User not found", Data = false };
+
+                var result = await _userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
+                return result.Succeeded
+                    ? new DataTransferObject<bool> { Message = "Password reset successful", Data = true }
+                    : new DataTransferObject<bool> { Message = "User not found", Data = false };
+            }
+            catch
+            {
+                throw new InvalidOperationException("Password reset operating failed!");
             }
         }
 

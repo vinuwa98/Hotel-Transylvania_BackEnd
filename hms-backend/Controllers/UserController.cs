@@ -74,6 +74,36 @@ namespace HmsBackend.Controllers
             }
         }
 
+        [Route("forgot-password")]
+        [HttpPost]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto forgotPassword)
+        {
+            var result = await _userService.SendResetPasswordEmailAsync(forgotPassword.Email);
+            if (result.Data)
+            {
+                return Ok(result.Message);
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, result.Message);
+            }
+        }
+
+        [Route("reset-password")]
+        [HttpGet]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDto model)
+        {
+            var result = await _userService.ResetPasswordAsync(model);
+            if (result.Data)
+            {
+                return Ok(result.Message);
+            }
+            else
+            {
+                return BadRequest(result.Message);
+            }
+        }
+
         [Authorize(Policy = "AdminOnly")]
         [Route("update-user")]
         [HttpPut]

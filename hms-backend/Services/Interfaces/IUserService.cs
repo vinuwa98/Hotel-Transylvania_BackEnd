@@ -1,4 +1,4 @@
-﻿using hms_backend.DTOs;
+﻿using HmsBackend.DTOs;
 using HmsBackend.DTOs;
 using HmsBackend.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -17,5 +17,7 @@ namespace HmsBackend.Services.Interfaces
         Task<bool> DeactivateUserAsync(string userId);
 
         Task<bool> ActivateUserAsync(string userId);
+        Task<DataTransferObject<bool>> SendResetPasswordEmailAsync(string email);
+        Task<DataTransferObject<bool>> ResetPasswordAsync(ResetPasswordDto model);
     }
 }
