@@ -75,28 +75,22 @@ namespace HmsBackend.Controllers
         }
 
         [Authorize(Policy = "AdminOnly")]
-        [Route("update-user")]
-        [HttpPut]
-        public async Task<IActionResult> UpdateUser(UpdateUserDto updateUserDto)
+        [HttpGet("get-user/{id}")]
+        public async Task<IActionResult> GetUserById(string id)
         {
-            var result = await _userService.UpdateUserAsync(updateUserDto);
-
             try
             {
-                // Fix: Explicitly convert the DataTransferObject to an IActionResult
-                if (result.Data != null)
-                {
-                    return Ok(result);
-                }
+                var user = await _userService.GetUserByIdAsync(id); // You must have this in your service
+                if (user == null)
+                    return NotFound();
+
+                return Ok(user);
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
-
-            return null;
         }
-
 
         [Authorize(Policy = "AdminOnly")]
         [Route("get-users")]

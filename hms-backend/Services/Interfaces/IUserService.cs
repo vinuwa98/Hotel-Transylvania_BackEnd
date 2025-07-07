@@ -12,6 +12,7 @@ namespace HmsBackend.Services.Interfaces
         Task<DataTransferObject<LoginSuccessDto>> LoginAsync(UserDto user);
         Task<DataTransferObject<List<UserViewDto>>> AddUserAsync(RegistrationDto registerRequest); // Corrected this line
         Task<List<UserViewDto>> GetAllUsersAsync();
+        Task<UserViewDto?> GetUserByIdAsync(string userId);
         DataTransferObject<List<SupervisorInfoDto>> GetAllSupervisors();
 
         Task<bool> DeactivateUserAsync(string userId);
