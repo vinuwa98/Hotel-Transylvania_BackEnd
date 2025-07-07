@@ -90,7 +90,7 @@ namespace HmsBackend.Controllers
         }
 
         [Route("reset-password")]
-        [HttpGet]
+        [HttpPost]
         public async Task<IActionResult> ResetPassword(ResetPasswordDto model)
         {
             var result = await _userService.ResetPasswordAsync(model);

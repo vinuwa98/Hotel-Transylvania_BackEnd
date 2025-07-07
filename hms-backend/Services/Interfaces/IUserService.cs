@@ -1,5 +1,4 @@
 ﻿using HmsBackend.DTOs;
-using HmsBackend.DTOs;
 using HmsBackend.Models;
 using Microsoft.AspNetCore.Mvc;
 
