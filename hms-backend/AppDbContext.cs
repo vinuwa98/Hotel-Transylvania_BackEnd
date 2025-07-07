@@ -23,7 +23,7 @@ namespace HmsBackend
                 entity.Ignore(u => u.LockoutEnabled);
                 entity.Ignore(u => u.AccessFailedCount);
                 entity.Ignore(u => u.ConcurrencyStamp);
-                entity.Ignore(u => u.SecurityStamp);
+                //entity.Ignore(u => u.SecurityStamp);
                 entity.Ignore(u => u.LockoutEnd);
             });
 

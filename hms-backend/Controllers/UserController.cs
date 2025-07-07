@@ -89,6 +89,7 @@ namespace HmsBackend.Controllers
             }
         }
 
+        [AllowAnonymous]
         [Route("reset-password")]
         [HttpPost]
         public async Task<IActionResult> ResetPassword(ResetPasswordDto model)

@@ -4,6 +4,7 @@ using HmsBackend.Models;
 using HmsBackend.Repositories.Interfaces;
 using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -39,9 +40,9 @@ namespace HmsBackend.Services
                 var userWithRoles = await AssignRoles(identityUser);
                 return new DataTransferObject<LoginSuccessDto> { Message = "Login Successful", Data = userWithRoles };
             }
-            catch
+            catch (Exception ex)
             {
-                throw new InvalidOperationException("Unexpected exception occurred!");
+                throw new InvalidOperationException("User login failed with: " + ex.Message);
             }
         }
 
@@ -57,12 +58,11 @@ namespace HmsBackend.Services
 
                 await _userManager.AddToRoleAsync(newUser, registerRequest.Role);
 
-                await SendResetPasswordEmailAsync(registerRequest.Email);
-
                 var users = _userManager.Users
                     .Where(u => u.Role != "Admin")
                     .Select(u => new UserViewDto
                     {
+                        FullName = $"{u.FirstName} {u.LastName}",
                         FirstName = u.FirstName,
                         LastName = u.LastName,
                         Address = u.Address,
@@ -71,6 +71,8 @@ namespace HmsBackend.Services
                         Status = u.IsActive ? "Active" : "Inactive",
                     })
                     .ToList();
+
+                await SendResetPasswordEmailAsync(registerRequest.Email);
 
                 return new DataTransferObject<List<UserViewDto>> { Message = "User added successfully", Data = users };
             }
@@ -115,8 +117,8 @@ namespace HmsBackend.Services
                     return new DataTransferObject<bool> { Data = false, Message = "User not found" };
 
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var link = $"http://localhost:5173/reset-password?token={Uri.EscapeDataString(token)}&email={email}";
-                await _emailService.SendEmailAsync(email, "Reset Password", $"Go to reset: \"{link}\"");
+                var link = $"http://localhost:5173/reset-password?token={Uri.EscapeDataString(token)}&email={user.Email}";
+                await _emailService.SendEmailAsync(email, "Reset Password", $"Go to reset: <a href=\"{link}\">Click here to reset your password</a>");
 
                 return new DataTransferObject<bool> { Data = true, Message = "Reset email sent!" };
             }
@@ -134,14 +136,18 @@ namespace HmsBackend.Services
                 if (user == null)
                     return new DataTransferObject<bool> { Message = "User not found", Data = false };
 
-                var result = await _userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
-                return result.Succeeded
-                    ? new DataTransferObject<bool> { Message = "Password reset successful", Data = true }
-                    : new DataTransferObject<bool> { Message = "User not found", Data = false };
+                var decodedToken = Uri.UnescapeDataString(model.Token);
+                var result = await _userManager.ResetPasswordAsync(user, decodedToken, model.NewPassword);
+                if (result.Succeeded)
+                {
+                    return new DataTransferObject<bool> { Message = "Password reset successful", Data = true };
+                }
+
+                throw new InvalidOperationException("Invalid token");
             }
-            catch
+            catch (Exception ex)
             {
-                throw new InvalidOperationException("Password reset operating failed!");
+                    throw new InvalidOperationException("Password reset operating failed with: " + ex.Message);
             }
         }
 
