@@ -133,5 +133,27 @@ namespace HmsBackend.Controllers
             return Ok(new { message = "User activated successfully" });
         }
 
+        [Authorize(Policy = "AdminOnly")]
+        [HttpPut("update-user")]
+        public async Task<IActionResult> UpdateUser([FromBody] UpdateUserDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                var result = await _userService.UpdateUserAsync(dto);
+                if (result.Data == null)
+                    return NotFound(new { message = result.Message });
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+
     }
 }
