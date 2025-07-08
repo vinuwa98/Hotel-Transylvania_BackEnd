@@ -196,6 +196,9 @@ namespace hms_backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("SupervisorID")
                         .HasColumnType("nvarchar(max)");
 
