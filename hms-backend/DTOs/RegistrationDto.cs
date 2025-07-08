@@ -4,6 +4,8 @@ using Swashbuckle.AspNetCore.Filters;
 
 namespace HmsBackend.DTOs
 {
+    using System.ComponentModel.DataAnnotations;
+
     public class RegistrationDto
     {
         [Required]
@@ -32,4 +34,5 @@ namespace HmsBackend.DTOs
 
         public string? SupervisorID { get; set; }
     }
+
 }

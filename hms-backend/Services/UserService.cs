@@ -1,5 +1,4 @@
 ﻿using HmsBackend.DTOs;
-using HmsBackend.DTOs;
 using HmsBackend.Models;
 using HmsBackend.Repositories.Interfaces;
 using HmsBackend.Services.Interfaces;
@@ -38,6 +37,10 @@ namespace HmsBackend.Services
                     throw new InvalidOperationException("Bad credentials!");
 
                 var userWithRoles = await AssignRoles(identityUser);
+                userWithRoles.UserName = identityUser.UserName;
+                userWithRoles.FirstName = identityUser.FirstName;
+                userWithRoles.LastName = identityUser.LastName;
+
                 return new DataTransferObject<LoginSuccessDto> { Message = "Login Successful", Data = userWithRoles };
             }
             catch (Exception ex)
@@ -329,7 +332,7 @@ namespace HmsBackend.Services
 
         private async Task<LoginSuccessDto> AssignRoles(User identityUser)
         {
-            var roles = await _userRepository.GetRolesAsync(identityUser);
+            var roles = await _userManager.GetRolesAsync(identityUser);
 
             var claims = new List<Claim>
                             {
