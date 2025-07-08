@@ -113,6 +113,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("SupervisorOnly", policy => policy.RequireRole("Supervisor"));
     options.AddPolicy("MaintenanceStaffOnly", policy => policy.RequireRole("MaintenanceStaff"));
     options.AddPolicy("MaintenanceManagerOnly", policy => policy.RequireRole("MaintenanceManager"));
+    options.AddPolicy("HelpDeskOnly", policy => policy.RequireRole("HelpDesk"));
 });
 
 builder.Logging.ClearProviders();
