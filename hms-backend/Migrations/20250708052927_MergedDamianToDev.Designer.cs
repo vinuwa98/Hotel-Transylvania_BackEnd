@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace hms_backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250707085028_UncommentedIgnoringSecurityStampFromTheIdentityUser")]
-    partial class UncommentedIgnoringSecurityStampFromTheIdentityUser
+    [Migration("20250708052927_MergedDamianToDev")]
+    partial class MergedDamianToDev
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
