@@ -103,6 +103,34 @@ namespace HmsBackend.Services
             }
         }
 
+        public async Task<UserViewDto?> GetUserByIdAsync(string userId)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null) return null;
+
+            var userRole = await (
+                from ur in _context.UserRoles
+                join r in _context.Roles on ur.RoleId equals r.Id
+                where ur.UserId == user.Id
+                select r.Name
+            ).FirstOrDefaultAsync();
+
+            return new UserViewDto
+            {
+                Id = user.Id,
+                FullName = $"{user.FirstName} {user.LastName}",
+                FirstName = user.FirstName,     
+                LastName = user.LastName,
+                Email = user.Email,
+                Address = user.Address,
+                ContactNumber = user.ContactNumber,
+                Role = userRole ?? "Unknown",
+                Status = user.IsActive ? "Active" : "Inactive"
+            };
+        }
+
         public async Task<DataTransferObject<List<User>>> UpdateUserAsync(UpdateUserDto dto)
         {
             try
