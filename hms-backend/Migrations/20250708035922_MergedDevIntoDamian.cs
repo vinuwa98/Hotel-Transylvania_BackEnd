@@ -6,11 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace hms_backend.Migrations
 {
     /// <inheritdoc />
-<<<<<<<< HEAD:hms-backend/Migrations/20250702092653_DevIntoBackendDamian.cs
-    public partial class DevIntoBackendDamian : Migration
-========
-    public partial class UserCodeIsNotNullable : Migration
->>>>>>>> dev:hms-backend/Migrations/20250704054025_UserCodeIsNotNullable.cs
+    public partial class MergedDevIntoDamian : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -12,13 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace hms_backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-<<<<<<<< HEAD:hms-backend/Migrations/20250702092653_DevIntoBackendDamian.Designer.cs
-    [Migration("20250702092653_DevIntoBackendDamian")]
-    partial class DevIntoBackendDamian
-========
-    [Migration("20250704054025_UserCodeIsNotNullable")]
-    partial class UserCodeIsNotNullable
->>>>>>>> dev:hms-backend/Migrations/20250704054025_UserCodeIsNotNullable.Designer.cs
+    [Migration("20250708035922_MergedDevIntoDamian")]
+    partial class MergedDevIntoDamian
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -1,6 +1,4 @@
-﻿using hms_backend.DTOs;
-using HmsBackend.DTOs;
-using HmsBackend.DTOs;
+﻿using HmsBackend.DTOs;
 using HmsBackend.Models;
 using HmsBackend.Repositories.Interfaces;
 using HmsBackend.Services.Interfaces;
@@ -64,18 +62,32 @@ namespace HmsBackend.Services
 
                 await SendResetPasswordEmailAsync(registerRequest.Email);
 
-                var users = _userManager.Users
-                    .Where(u => u.Role != "Admin")
-                    .Select(u => new UserViewDto
-                    {
-                        FirstName = u.FirstName,
-                        LastName = u.LastName,
-                        Address = u.Address,
-                        Role = u.Role,
-                        ContactNumber = u.ContactNumber,
-                        Status = u.IsActive ? "Active" : "Inactive",
-                    })
-                    .ToList();
+                //var users = _userManager.Users
+                //    .Where(u => u.Role != "Admin")
+                //    .Select(u => new UserViewDto
+                //    {
+                //        FullName = $"{u.FirstName} {u.LastName}",
+                //        FirstName = u.FirstName,
+                //        LastName = u.LastName,
+                //        Address = u.Address,
+                //        Role = u.Role,
+                //        ContactNumber = u.ContactNumber,
+                //        Status = u.IsActive ? "Active" : "Inactive",
+                //    })
+                //    .ToList();
+                var users = (from u in _userManager.Users
+                             where u.Role != "Admin"
+                             select new UserViewDto
+                             {
+                                 FullName = u.FirstName + " " + u.LastName,
+                                 FirstName = u.FirstName,
+                                 LastName = u.LastName,
+                                 Address = u.Address,
+                                 Role = u.Role,
+                                 ContactNumber = u.ContactNumber,
+                                 Status = u.IsActive ? "Active" : "Inactive"
+                             }).ToList();
+
 
                 return new DataTransferObject<List<UserViewDto>> { Message = "User added successfully", Data = users };
             }
