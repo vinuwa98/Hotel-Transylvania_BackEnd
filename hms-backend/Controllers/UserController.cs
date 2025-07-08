@@ -3,6 +3,8 @@ using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace HmsBackend.Controllers
 {
@@ -106,28 +108,22 @@ namespace HmsBackend.Controllers
         }
 
         [Authorize(Policy = "AdminOnly")]
-        [Route("update-user")]
-        [HttpPut]
-        public async Task<IActionResult> UpdateUser(UpdateUserDto updateUserDto)
+        [HttpGet("get-user/{id}")]
+        public async Task<IActionResult> GetUserById(string id)
         {
-            var result = await _userService.UpdateUserAsync(updateUserDto);
-
             try
             {
-                // Fix: Explicitly convert the DataTransferObject to an IActionResult
-                if (result.Data != null)
-                {
-                    return Ok(result);
-                }
+                var user = await _userService.GetUserByIdAsync(id); // You must have this in your service
+                if (user == null)
+                    return NotFound();
+
+                return Ok(user);
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
-
-            return null;
         }
-
 
         [Authorize(Policy = "AdminOnly")]
         [Route("get-users")]
@@ -170,5 +166,37 @@ namespace HmsBackend.Controllers
             return Ok(new { message = "User activated successfully" });
         }
 
+        [Authorize(Policy = "AdminOnly")]
+        [HttpPut("update-user")]
+        public async Task<IActionResult> UpdateUser([FromBody] UpdateUserDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                var result = await _userService.UpdateUserAsync(dto);
+                if (result.Data == null)
+                    return NotFound(new { message = result.Message });
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpGet("get-logged-user")]
+        public async Task<IActionResult> GetLoggedUser()
+        {
+            var fullName = await _userService.GetLoggedUserFullNameAsync(User);
+
+            if (fullName == null)
+                return NotFound(new { message = "User not found or not authorized" });
+
+            return Ok(new { fullName });
+        }
     }
 }

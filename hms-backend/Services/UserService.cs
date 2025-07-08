@@ -154,6 +154,34 @@ namespace HmsBackend.Services
             }
         }
 
+        public async Task<UserViewDto?> GetUserByIdAsync(string userId)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null) return null;
+
+            var userRole = await (
+                from ur in _context.UserRoles
+                join r in _context.Roles on ur.RoleId equals r.Id
+                where ur.UserId == user.Id
+                select r.Name
+            ).FirstOrDefaultAsync();
+
+            return new UserViewDto
+            {
+                Id = user.Id,
+                FullName = $"{user.FirstName} {user.LastName}",
+                FirstName = user.FirstName,     
+                LastName = user.LastName,
+                Email = user.Email,
+                Address = user.Address,
+                ContactNumber = user.ContactNumber,
+                Role = userRole ?? "Unknown",
+                Status = user.IsActive ? "Active" : "Inactive"
+            };
+        }
+
         public async Task<DataTransferObject<List<User>>> UpdateUserAsync(UpdateUserDto dto)
         {
             try
@@ -433,6 +461,30 @@ namespace HmsBackend.Services
             {
                 Console.WriteLine(ex.Message);
                 return false;
+            }
+        }
+
+        // View logged user name
+        public async Task<string?> GetLoggedUserFullNameAsync(ClaimsPrincipal userClaims)
+        {
+            try
+            {
+                var userId = userClaims.FindFirst("UserId")?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                    return null;
+
+                var user = await _context.Users
+                    .Where(u => u.Id == userId)
+                    .Select(u => (u.FirstName + " " + u.LastName).Trim())
+                    .FirstOrDefaultAsync();
+
+                return user;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error fetching logged-in user name: " + ex.Message);
+                return null;
             }
         }
     }

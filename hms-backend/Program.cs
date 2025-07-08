@@ -56,7 +56,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
+    options.AddPolicy("AllowFrontend", policy =>    
     {
         policy.WithOrigins("http://localhost:5173")
               .AllowAnyHeader()
