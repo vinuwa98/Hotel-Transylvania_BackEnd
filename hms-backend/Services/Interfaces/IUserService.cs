@@ -18,7 +18,5 @@ namespace HmsBackend.Services.Interfaces
         Task<bool> ActivateUserAsync(string userId);
 
         Task<string?> GetLoggedUserFullNameAsync(ClaimsPrincipal userClaims);
-
-        //Task<List<UserViewDto>> GetLoggedUserName();
     }
 }

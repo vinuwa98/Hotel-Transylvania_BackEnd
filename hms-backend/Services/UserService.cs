@@ -277,12 +277,7 @@ namespace HmsBackend.Services
             }
         }
 
-        //public async Task<List<UserViewDto>> GetLoggedUserName()
-        //{
-
-
-        //}
-
+        // View logged user name
         public async Task<string?> GetLoggedUserFullNameAsync(ClaimsPrincipal userClaims)
         {
             try
@@ -305,7 +300,5 @@ namespace HmsBackend.Services
                 return null;
             }
         }
-
-
     }
 }
