@@ -1,4 +1,5 @@
-﻿using HmsBackend.DTOs;
+﻿using hms_backend.DTOs;
+using HmsBackend.DTOs;
 using HmsBackend.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -7,11 +8,12 @@ namespace HmsBackend.Services.Interfaces
 {
     public interface IUserService
     {
-        Task<DataTransferObject<List<User>>> AddUserAsync(RegistrationDto registerRequest);
+        Task<DataTransferObject<List<User>>> UpdateUserAsync(UpdateUserDto updateUserDto);
         Task<bool> IsUserAlreadyExists(string email);
         Task<DataTransferObject<LoginSuccessDto>> LoginAsync(UserDto user);
-        Task<IActionResult> UpdateUserAsync(UpdateUserDto updateUserDto);
+        Task<DataTransferObject<List<UserViewDto>>> AddUserAsync(RegistrationDto registerRequest); // Corrected this line
         Task<List<UserViewDto>> GetAllUsersAsync();
+        DataTransferObject<List<SupervisorInfoDto>> GetAllSupervisors();
 
         Task<bool> DeactivateUserAsync(string userId);
 

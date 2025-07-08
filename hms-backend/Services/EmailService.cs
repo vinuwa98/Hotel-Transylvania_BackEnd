@@ -10,7 +10,7 @@ namespace HmsBackend.Services
 
         public async Task SendEmailAsync(string toEmail, string subject, string message)
         {
-            var smtpClient = new SmtpClient("smtp.example.com")
+            var smtpClient = new SmtpClient("smtp.gmail.com")
             {
                 Port = 587,
                 Credentials = new NetworkCredential("your-email@example.com", "your-password"),
