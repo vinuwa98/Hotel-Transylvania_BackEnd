@@ -1,4 +1,5 @@
-﻿namespace HmsBackend.DTOs
+﻿
+namespace HmsBackend.DTOs
 {
     public class LoginSuccessDto
     {

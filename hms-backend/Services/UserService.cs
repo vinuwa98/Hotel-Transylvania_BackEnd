@@ -196,49 +196,83 @@ namespace HmsBackend.Services
                     };
                 }
 
-                //Update user fields
-                user.Email = dto.Email;
-                user.UserName = dto.Email;
-                user.ContactNumber = dto.ContactNumber;
-                user.FirstName = dto.FirstName;
-                user.LastName = dto.LastName;
-                user.Address = dto.Address;
-                user.DOB = dto.DOB;
-
-                //Update password
-                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var passwordResult = await _userManager.ResetPasswordAsync(user, token, dto.Password);
-                if (!passwordResult.Succeeded)
+                if (!string.IsNullOrEmpty(dto.Email))
                 {
-                    return new DataTransferObject<List<User>>
-                    {
-                        Message = "Password update failed",
-                        Data = null
-                    };
+                    user.Email = dto.Email;
+                    user.UserName = dto.Email; 
                 }
 
-                //Update roles if needed
-                var currentRoles = await _userManager.GetRolesAsync(user);
-                if (!currentRoles.Contains(dto.Role))
+                if (!string.IsNullOrEmpty(dto.ContactNumber))
                 {
-                    var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
-                    if (!removeResult.Succeeded)
+                    user.ContactNumber = dto.ContactNumber;
+                }
+
+                if (!string.IsNullOrEmpty(dto.FirstName))
+                {
+                    user.FirstName = dto.FirstName;
+                }
+
+                if (!string.IsNullOrEmpty(dto.LastName))
+                {
+                    user.LastName = dto.LastName;
+                }
+
+                if (!string.IsNullOrEmpty(dto.Address))
+                {
+                    user.Address = dto.Address;
+                }
+
+               
+
+                if (dto.DOB.HasValue)
+                {
+                    user.DOB = dto.DOB.Value;
+                }
+
+
+
+                //Update password
+                if (!string.IsNullOrEmpty(dto.Password))
+                {
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    var passwordResult = await _userManager.ResetPasswordAsync(user, token, dto.Password);
+                    if (!passwordResult.Succeeded)
                     {
                         return new DataTransferObject<List<User>>
                         {
-                            Message = "Failed to remove old roles",
+                            Message = "Password update failed",
                             Data = null
                         };
                     }
+                }
 
-                    var addRoleResult = await _userManager.AddToRoleAsync(user, dto.Role);
-                    if (!addRoleResult.Succeeded)
+
+
+                if (!string.IsNullOrEmpty(dto.Role))
+                {
+                    //Update roles if needed
+                    var currentRoles = await _userManager.GetRolesAsync(user);
+                    if (!currentRoles.Contains(dto.Role))
                     {
-                        return new DataTransferObject<List<User>>
+                        var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                        if (!removeResult.Succeeded)
                         {
-                            Message = "Failed to add new role",
-                            Data = null
-                        };
+                            return new DataTransferObject<List<User>>
+                            {
+                                Message = "Failed to remove old roles",
+                                Data = null
+                            };
+                        }
+
+                        var addRoleResult = await _userManager.AddToRoleAsync(user, dto.Role);
+                        if (!addRoleResult.Succeeded)
+                        {
+                            return new DataTransferObject<List<User>>
+                            {
+                                Message = "Failed to add new role",
+                                Data = null
+                            };
+                        }
                     }
                 }
 
