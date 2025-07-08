@@ -1,6 +1,7 @@
 ﻿using HmsBackend.DTOs;
 using HmsBackend.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace HmsBackend.Services.Interfaces
 {
@@ -15,5 +16,9 @@ namespace HmsBackend.Services.Interfaces
         Task<bool> DeactivateUserAsync(string userId);
 
         Task<bool> ActivateUserAsync(string userId);
+
+        Task<string?> GetLoggedUserFullNameAsync(ClaimsPrincipal userClaims);
+
+        //Task<List<UserViewDto>> GetLoggedUserName();
     }
 }

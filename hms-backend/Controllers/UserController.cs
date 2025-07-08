@@ -2,6 +2,8 @@
 using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace HmsBackend.Controllers
 {
@@ -96,6 +98,42 @@ namespace HmsBackend.Controllers
                 return NotFound(new { message = "User not found or already active" });
 
             return Ok(new { message = "User activated successfully" });
+        }
+
+        //[Authorize]
+        //[HttpGet("get-logged-user-name")]
+
+        //public async Task<IActionResult> GetLoggedUser()
+        //{
+        //    var userId = User.FindFirst("UserId")?.Value;
+
+        //    if (string.IsNullOrEmpty(userId))
+        //        return Unauthorized(new { message = "User ID not found in token" });
+
+        //    var user = await _context.Users
+        //        .Where(u => u.Id == userId)
+        //        .Select(u => new
+        //        {
+        //            fullName = (u.FirstName + " " + u.LastName).Trim()
+        //        })
+        //        .FirstOrDefaultAsync();
+
+        //    if (user == null)
+        //        return NotFound(new { message = "User not found" });
+
+        //    return Ok(user);
+        //}
+
+        [Authorize]
+        [HttpGet("get-logged-user")]
+        public async Task<IActionResult> GetLoggedUser()
+        {
+            var fullName = await _userService.GetLoggedUserFullNameAsync(User);
+
+            if (fullName == null)
+                return NotFound(new { message = "User not found or not authorized" });
+
+            return Ok(new { fullName });
         }
 
     }

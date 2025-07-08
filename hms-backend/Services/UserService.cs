@@ -276,5 +276,36 @@ namespace HmsBackend.Services
                 return false;
             }
         }
+
+        //public async Task<List<UserViewDto>> GetLoggedUserName()
+        //{
+
+
+        //}
+
+        public async Task<string?> GetLoggedUserFullNameAsync(ClaimsPrincipal userClaims)
+        {
+            try
+            {
+                var userId = userClaims.FindFirst("UserId")?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                    return null;
+
+                var user = await _context.Users
+                    .Where(u => u.Id == userId)
+                    .Select(u => (u.FirstName + " " + u.LastName).Trim())
+                    .FirstOrDefaultAsync();
+
+                return user;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error fetching logged-in user name: " + ex.Message);
+                return null;
+            }
+        }
+
+
     }
 }
