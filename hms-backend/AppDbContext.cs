@@ -7,7 +7,7 @@ namespace HmsBackend
     public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<User>(options)
     {
         public DbSet<Room> Rooms { get; set; }
-        public DbSet<Complaint> Complaint => Set<Complaint>();
+        public DbSet<Complaint> Complaints { get; set; }
         public DbSet<Job> Job => Set<Job>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -75,6 +75,13 @@ namespace HmsBackend
                 .HasOne(ju => ju.User)
                 .WithMany(u => u.JobUsers)
                 .HasForeignKey(ju => ju.UserId);
+
+            modelBuilder.Entity<Job>()
+                .HasOne(j => j.Cleaner)
+                .WithMany()
+                .HasForeignKey(j => j.CleanerId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete
+
 
 
             modelBuilder.Entity<Room>().HasData(
