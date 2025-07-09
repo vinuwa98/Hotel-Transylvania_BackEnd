@@ -38,5 +38,9 @@ namespace HmsBackend.Models
         public Complaint Complaint { get; set; }
 
         public List<JobUser> JobUsers { get; set; } = new();
+
+        public string? CleanerId { get; set; }  // foreign key
+        public User? Cleaner { get; set; }      // navigation property
+
     }
 }
