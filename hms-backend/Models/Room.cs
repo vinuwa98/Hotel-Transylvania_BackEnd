@@ -12,8 +12,7 @@ namespace HmsBackend.Models
         [MaxLength(50)]
         public string RoomType { get; set; }
 
-        [Required]
-        public string UserId { get; set; }
+        public string? UserId { get; set; } //Make it nullable
 
         public User User { get; set; }
 

@@ -4,6 +4,7 @@ using HmsBackend;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace hms_backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250709063254_migration1")]
+    partial class migration1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -140,6 +143,7 @@ namespace hms_backend.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("RoomId");
@@ -147,38 +151,6 @@ namespace hms_backend.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Rooms");
-
-                    b.HasData(
-                        new
-                        {
-                            RoomId = 1,
-                            RoomType = "Single"
-                        },
-                        new
-                        {
-                            RoomId = 2,
-                            RoomType = "Double"
-                        },
-                        new
-                        {
-                            RoomId = 3,
-                            RoomType = "Deluxe"
-                        },
-                        new
-                        {
-                            RoomId = 4,
-                            RoomType = "Suite"
-                        },
-                        new
-                        {
-                            RoomId = 5,
-                            RoomType = "Family"
-                        },
-                        new
-                        {
-                            RoomId = 6,
-                            RoomType = "Presidential"
-                        });
                 });
 
             modelBuilder.Entity("HmsBackend.Models.User", b =>
@@ -455,7 +427,9 @@ namespace hms_backend.Migrations
                 {
                     b.HasOne("HmsBackend.Models.User", "User")
                         .WithMany("Rooms")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
