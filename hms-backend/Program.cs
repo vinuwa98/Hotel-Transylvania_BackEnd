@@ -121,6 +121,17 @@ builder.Logging.AddConsole();
 
 var app = builder.Build();
 
+// Seed mock data
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<AppDbContext>();
+    var userManager = services.GetRequiredService<UserManager<User>>();
+
+    context.Database.Migrate(); // Apply migrations
+    await DbSeeder.SeedAsync(context, userManager);
+}
+
 async Task SeedRolesAndAdminAsync(IServiceProvider services)
 {
     using var scope = services.CreateScope();

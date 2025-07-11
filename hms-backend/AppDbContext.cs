@@ -82,8 +82,6 @@ namespace HmsBackend
                 .HasForeignKey(j => j.CleanerId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete
 
-
-
             modelBuilder.Entity<Room>().HasData(
                 new Room { RoomId = 1, RoomType = "Single", UserId = null },
                 new Room { RoomId = 2, RoomType = "Double", UserId = null },
