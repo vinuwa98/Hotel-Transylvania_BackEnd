@@ -32,5 +32,8 @@ namespace HmsBackend.Models
         public Room Room { get; set; }
 
         public List<Job> Jobs { get; set; } = new();
+
+        public bool IsActive { get; set; } = true; // default is active
+
     }
 }
