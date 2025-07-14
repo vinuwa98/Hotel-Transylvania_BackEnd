@@ -9,12 +9,18 @@ namespace HmsBackend.Models
         public int Id { get; set; }
 
         [Required]
+        public required string JobNumber { get; set; }
+
+        [Required]
         [MaxLength(100)]
         public string Name { get; set; }
 
         [Required]
         [MaxLength(50)]
         public string Status { get; set; }
+
+        [Required]
+        public required bool IsActive { get; set; }
 
         [MaxLength(500)]
         public string? Description { get; set; }

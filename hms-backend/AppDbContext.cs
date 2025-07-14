@@ -1,4 +1,5 @@
-﻿using HmsBackend.Models;
+﻿using hms_backend.Models;
+using HmsBackend.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ namespace HmsBackend
         public DbSet<Room> Rooms { get; set; }
         public DbSet<Complaint> Complaint => Set<Complaint>();
         public DbSet<Job> Job => Set<Job>();
+        public DbSet<RoomStatus> RoomStatus { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

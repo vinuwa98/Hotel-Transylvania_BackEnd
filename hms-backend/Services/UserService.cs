@@ -14,10 +14,9 @@ using System.Text;
 
 namespace HmsBackend.Services
 {
-    public class UserService(UserManager<User> userManager, IUserRepository userRepository, IConfiguration configuration, AppDbContext appDbContext, IEmailService emailService) : IUserService
+    public class UserService(UserManager<User> userManager, IConfiguration configuration, AppDbContext appDbContext, IEmailService emailService) : IUserService
     {
         private readonly IConfiguration _configuration = configuration;
-        private readonly IUserRepository _userRepository = userRepository; // TODO: remove this
         private readonly IEmailService _emailService = emailService;
 
         private readonly UserManager<User> _userManager = userManager;
