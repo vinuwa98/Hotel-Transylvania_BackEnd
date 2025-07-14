@@ -198,5 +198,31 @@ namespace HmsBackend.Controllers
 
             return Ok(new { fullName });
         }
+
+        [Authorize(Roles = "Supervisor,HelpDesk,Admin")]
+        [HttpGet("get-cleaners")]
+        public async Task<IActionResult> GetAllCleaners()
+        {
+            try
+            {
+                var cleaners = await _userService.GetAllUsersAsync();
+
+                var cleanerList = cleaners
+                    .Where(u => u.Role == "Cleaner" && u.Status == "Active")
+                    .Select(u => new
+                    {
+                        u.Id,
+                        u.FullName
+                    })
+                    .ToList();
+
+                return Ok(cleanerList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving cleaners: " + ex.Message);
+            }
+        }
+
     }
 }

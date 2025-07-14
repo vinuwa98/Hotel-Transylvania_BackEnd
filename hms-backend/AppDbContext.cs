@@ -9,6 +9,8 @@ namespace HmsBackend
         public DbSet<Room> Rooms { get; set; }
         public DbSet<Complaint> Complaints { get; set; }
         public DbSet<Job> Job => Set<Job>();
+        public DbSet<ComplaintCleaner> ComplaintCleaners { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
