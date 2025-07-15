@@ -1,4 +1,4 @@
-﻿using hms_backend.Models;
+﻿using HmsBackend.Models;
 using HmsBackend.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;

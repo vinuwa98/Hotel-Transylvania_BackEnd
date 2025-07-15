@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace hms_backend.DTOs
+namespace HmsBackend.DTOs
 {
     public class DeleteJobDto
     {

@@ -1,10 +1,10 @@
-﻿using hms_backend.DTOs;
+﻿using HmsBackend.DTOs;
 using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
-namespace hms_backend.Controllers
+namespace HmsBackend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

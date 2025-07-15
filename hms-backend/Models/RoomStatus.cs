@@ -1,7 +1,7 @@
 ﻿using HmsBackend.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace hms_backend.Models
+namespace HmsBackend.Models
 {
     public class RoomStatus
     {

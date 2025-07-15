@@ -20,7 +20,7 @@ namespace HmsBackend.Models
         public string Status { get; set; }
 
         [Required]
-        public required bool IsActive { get; set; }
+        public required bool IsDeleted { get; set; }
 
         [MaxLength(500)]
         public string? Description { get; set; }

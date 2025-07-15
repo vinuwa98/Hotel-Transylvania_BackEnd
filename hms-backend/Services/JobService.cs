@@ -1,4 +1,4 @@
-﻿using hms_backend.DTOs;
+﻿using HmsBackend.DTOs;
 using HmsBackend.Models;
 using HmsBackend.Repositories.Interfaces;
 using HmsBackend.Services.Interfaces;
@@ -29,7 +29,7 @@ namespace HmsBackend.Services
                     Status = "Pending",
                     Description = complaint.Description,
                     Priority = createJobRequest.Priority,
-                    IsActive = true,
+                    IsDeleted = true,
                 };
 
                 await _context.Job.AddAsync(job);
@@ -52,7 +52,7 @@ namespace HmsBackend.Services
                 if (job == null)
                     throw new Exception($"Cannot find a job with a job number {deleteJobReq.JobNumber}");
 
-                job.IsActive = false;
+                job.IsDeleted = true;
                 await _context.SaveChangesAsync();
 
                 return "Job delete successfully!";
