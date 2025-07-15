@@ -57,7 +57,7 @@ namespace HmsBackend
 
             // Configure Job -> AssignedManagerUser relationship (one User manages many Jobs)
             modelBuilder.Entity<Job>()
-                .HasOne(j => j.AssignedManagereUser)
+                .HasOne(j => j.AssignedManagerUser)
                 .WithMany()
                 .HasForeignKey(j => j.AssignedManagerUserId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete
@@ -78,19 +78,15 @@ namespace HmsBackend
                 .WithMany(u => u.JobUsers)
                 .HasForeignKey(ju => ju.UserId);
 
-            modelBuilder.Entity<Job>()
-                .HasOne(j => j.Cleaner)
-                .WithMany()
-                .HasForeignKey(j => j.CleanerId)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete
+           // Prevent cascade delete
 
             modelBuilder.Entity<Room>().HasData(
-                new Room { RoomId = 1, RoomType = "Single", UserId = null },
-                new Room { RoomId = 2, RoomType = "Double", UserId = null },
-                new Room { RoomId = 3, RoomType = "Deluxe", UserId = null },
-                new Room { RoomId = 4, RoomType = "Suite", UserId = null },
-                new Room { RoomId = 5, RoomType = "Family", UserId = null },
-                new Room { RoomId = 6, RoomType = "Presidential", UserId = null }
+                new Room { RoomId = "R1", RoomType = "Single", UserId = null },
+                new Room { RoomId = "R2", RoomType = "Double", UserId = null },
+                new Room { RoomId = "R3", RoomType = "Deluxe", UserId = null },
+                new Room { RoomId = "R4", RoomType = "Suite", UserId = null },
+                new Room { RoomId = "R5", RoomType = "Family", UserId = null },
+                new Room { RoomId = "R6", RoomType = "Presidential", UserId = null }
             );
         }
     }

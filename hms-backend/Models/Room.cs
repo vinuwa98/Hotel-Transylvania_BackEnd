@@ -6,7 +6,7 @@ namespace HmsBackend.Models
     public class Room
     {
         [Key]
-        public int RoomId { get; set; }
+        public string RoomId { get; set; }
 
         [Required]
         [MaxLength(50)]

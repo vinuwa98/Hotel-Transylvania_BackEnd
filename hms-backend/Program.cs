@@ -1,9 +1,10 @@
-using HmsBackend.Services;
-using HmsBackend.Services.Interfaces;
+using hms_backend.Services;
 using HmsBackend;
 using HmsBackend.Models;
 using HmsBackend.Repositories;
 using HmsBackend.Repositories.Interfaces;
+using HmsBackend.Services;
+using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -53,6 +54,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IJobService, JobService>();
+
 
 builder.Services.AddCors(options =>
 {

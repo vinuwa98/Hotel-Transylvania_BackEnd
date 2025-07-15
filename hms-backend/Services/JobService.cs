@@ -1,46 +1,218 @@
-﻿using HmsBackend.Models;
-using HmsBackend.Repositories.Interfaces;
+﻿using hms_backend.DTOs;
+using HmsBackend;
+using HmsBackend.DTOs;
+using HmsBackend.Models;
 using HmsBackend.Services.Interfaces;
-/*
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
 namespace hms_backend.Services
 {
-    public class JobService : IJobService
+    public class JobService(UserManager<User> userManager, IConfiguration configuration, AppDbContext appDbContext) : IJobService
     {
-        private readonly IJobRepository _jobRepository;
+        private readonly IConfiguration _configuration = configuration;
+        private readonly UserManager<User> _userManager = userManager;
+        private readonly AppDbContext _context = appDbContext;
 
-        public JobService(IJobRepository jobRepository)
+        public async Task<int> GetAllJobsCount()
         {
-            _jobRepository = jobRepository;
+            return await _context.Job.CountAsync();
         }
 
-        public async Task<IEnumerable<Job>> GetAllJobsAsync()
+        /*
+        public async Task<JobViewDto> GetJobByIdAsync(string jobId)
         {
-            
-            return await _jobRepository.GetAllAsync();
+            var job = await _context.Job
+                .Include(j => j.JobUsers)
+                .ThenInclude(ju => ju.User)
+                .FirstOrDefaultAsync(j => j.Id == jobId);
+
+            if (job == null) return null;
+
+            return new JobViewDto
+            {
+                Id = job.Id,
+                Name = job.Name,
+                Status = job.Status,
+                Description = job.Description,
+                Priority = job.Priority,
+                CreatedUserId = job.CreatedUserId,
+                ComplaintId = job.ComplaintId,
+                AssignedManagerUserId = job.AssignedManagerUserId,
+                Users = job.JobUsers.Select(ju => new JobUserViewDto
+                {
+                    UserId = ju.User.Id,
+                    FullName = ju.User.FirstName + " " + ju.User.LastName,
+                    Role = ju.User.Role
+                }).ToList()
+            };
+        }*/
+
+
+        public async Task<JobViewDto> GetJobByIdAsync(string jobId)
+        {
+            var job = await _context.Job
+                .Include(j => j.JobUsers)
+                    .ThenInclude(ju => ju.User)
+                .Include(j => j.AssignedManagerUser) 
+                .FirstOrDefaultAsync(j => j.Id == jobId);
+
+            if (job == null) return null;
+
+            return new JobViewDto
+            {
+                Id = job.Id,
+                Name = job.Name,
+                Status = job.Status,
+                Description = job.Description,
+                Priority = job.Priority,
+                CreatedUserId = job.CreatedUserId,
+                ComplaintId = job.ComplaintId,
+                AssignedManagerUserId = job.AssignedManagerUserId,
+                AssignedManagerName = job.AssignedManagerUser != null
+                    ? job.AssignedManagerUser.FirstName + " " + job.AssignedManagerUser.LastName
+                    : null,
+                Users = job.JobUsers.Select(ju => new JobUserViewDto
+                {
+                    UserId = ju.User.Id,
+                    FullName = ju.User.FirstName + " " + ju.User.LastName,
+                    Role = ju.User.Role
+                }).ToList()
+            };
         }
 
-        public async Task<Job> GetJobByIdAsync(int id)
+
+        public async Task<List<JobViewDto>> GetAllJobsAsync()
         {
-            return await _jobRepository.GetByIdAsync(id);
+            var jobs = await _context.Job
+                .Include(j => j.JobUsers)
+                .ThenInclude(ju => ju.User)
+                .ToListAsync();
+
+            return jobs.Select(job => new JobViewDto
+            {
+                Id = job.Id,
+                Name = job.Name,
+                Status = job.Status,
+                Description = job.Description,
+                Priority = job.Priority,
+                CreatedUserId = job.CreatedUserId,
+                ComplaintId = job.ComplaintId,
+                AssignedManagerUserId = job.AssignedManagerUserId,
+                Users = job.JobUsers.Select(ju => new JobUserViewDto
+                {
+                    UserId = ju.User.Id,
+                    FullName = ju.User.FirstName + " " + ju.User.LastName,
+                    Role = ju.User.Role
+                }).ToList()
+            }).ToList();
         }
 
-        public async Task CreateJobAsync(Job job)
+        public async Task<JobViewDto> UpdateJobUsersAsync(UpdateJobUsersDto updateDto)
         {
-           
-            await _jobRepository.AddAsync(job);
+            var job = await _context.Job
+                .Include(j => j.JobUsers)
+                .FirstOrDefaultAsync(j => j.Id == updateDto.JobId);
+
+            if (job == null) return null;
+
+       
+
+            // Create new links
+            var newJobUsers = updateDto.UserIds.Select(userId => new JobUser
+            {
+                JobId = job.Id,
+                UserId = userId
+            }).ToList();
+
+            job.JobUsers = newJobUsers;
+            await _context.SaveChangesAsync();
+
+            // Reload job with users to return updated result
+            var updatedJob = await _context.Job
+                .Include(j => j.JobUsers)
+                .ThenInclude(ju => ju.User)
+                .FirstOrDefaultAsync(j => j.Id == job.Id);
+
+            return new JobViewDto
+            {
+                Id = updatedJob.Id,
+                Name = updatedJob.Name,
+                Status = updatedJob.Status,
+                Description = updatedJob.Description,
+                Priority = updatedJob.Priority,
+                CreatedUserId = updatedJob.CreatedUserId,
+                ComplaintId = updatedJob.ComplaintId,
+                AssignedManagerUserId = updatedJob.AssignedManagerUserId,
+                Users = updatedJob.JobUsers.Select(ju => new JobUserViewDto
+                {
+                    UserId = ju.User.Id,
+                    FullName = ju.User.FirstName + " " + ju.User.LastName,
+                    Role = ju.User.Role
+                }).ToList()
+            };
         }
 
-        public async Task UpdateJobAsync(Job job)
+
+        public async Task<JobViewDto> UpdateJobStatusAsync(UpdateJobStatusDto updateDto)
         {
-          
-            await _jobRepository.UpdateAsync(job);
+            var job = await _context.Job
+                .Include(j => j.JobUsers)
+                .ThenInclude(ju => ju.User)
+                .FirstOrDefaultAsync(j => j.Id == updateDto.JobId);
+
+            if (job == null) return null;
+
+            job.Status = updateDto.Status;
+            await _context.SaveChangesAsync();
+
+            return new JobViewDto
+            {
+                Id = job.Id,
+                Name = job.Name,
+                Status = job.Status,
+                Description = job.Description,
+                Priority = job.Priority,
+                AssignedManagerUserId = job.AssignedManagerUserId,
+                CreatedUserId = job.CreatedUserId,
+                ComplaintId = job.ComplaintId,
+                Users = job.JobUsers.Select(ju => new JobUserViewDto
+                {
+                    UserId = ju.User.Id,
+                    FullName = ju.User.FirstName + " " + ju.User.LastName,
+                    Role = ju.User.Role
+                }).ToList()
+            };
         }
 
-        public async Task DeleteJobAsync(int id)
+
+        public async Task<DashboardSummaryDto> GetDashboardSummaryAsync()
         {
-            // Check business rules before delete
-            await _jobRepository.DeleteAsync(id);
+            var totalJobs = await _context.Job.CountAsync();
+            var completedJobs = await _context.Job
+                .Where(j => j.Status == "Completed")
+                .CountAsync();
+
+            var totalWorkers = await _userManager.Users
+                .Where(u => u.Role == "MaintenanceStaff")
+                .CountAsync();
+
+            var activeJobs = await _context.Job
+     .Where(j => j.Status == "Pending" || j.Status == "In Progress")
+     .CountAsync();
+
+
+
+
+            return new DashboardSummaryDto
+            {
+                TotalJobs = totalJobs,
+                CompletedJobs = completedJobs,
+                TotalWorkers = totalWorkers,
+                ActiveJobs = activeJobs
+            };
         }
+
+
     }
 }
-*/

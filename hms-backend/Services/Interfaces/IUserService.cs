@@ -22,5 +22,7 @@ namespace HmsBackend.Services.Interfaces
         Task<string?> GetLoggedUserFullNameAsync(ClaimsPrincipal userClaims);
         Task<DataTransferObject<bool>> SendResetPasswordEmailAsync(string email);
         Task<DataTransferObject<bool>> ResetPasswordAsync(ResetPasswordDto model);
+
+        Task<List<UserViewDto>> GetMaintenanceStaffAsync();
     }
 }
