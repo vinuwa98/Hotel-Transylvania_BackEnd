@@ -50,9 +50,10 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IJobService, JobService>();
+builder.Services.AddScoped<IRoomService, RoomService>();
 
 builder.Services.AddCors(options =>
 {

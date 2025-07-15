@@ -9,11 +9,14 @@ namespace HmsBackend.Models
         public int RoomId { get; set; }
 
         [Required]
+        public required string RoomNumber { get; set; }
+
+        [Required]
         [MaxLength(50)]
         public string RoomType { get; set; }
 
-        [Required]
-        public string UserId { get; set; }
+        //[Required]
+        public string? UserId { get; set; }
 
         public User User { get; set; }
 

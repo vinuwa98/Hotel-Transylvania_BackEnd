@@ -1,46 +1,66 @@
-﻿using HmsBackend.Models;
+﻿using HmsBackend.DTOs;
+using HmsBackend.Models;
 using HmsBackend.Repositories.Interfaces;
 using HmsBackend.Services.Interfaces;
-/*
-namespace hms_backend.Services
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace HmsBackend.Services
 {
-    public class JobService : IJobService
+    public class JobService(AppDbContext appDbContext) : IJobService
     {
-        private readonly IJobRepository _jobRepository;
+        private readonly AppDbContext _context = appDbContext;
 
-        public JobService(IJobRepository jobRepository)
+        public async Task<string> CreateAJob(CreateJobDto createJobRequest)
         {
-            _jobRepository = jobRepository;
+            try
+            {
+                var complaint = await (from c in _context.Complaint where c.ComplaintNumber == createJobRequest.ComplaintNumber select c).FirstOrDefaultAsync();
+
+                if (complaint == null)
+                    throw new Exception($"Cannot find a complaint with a complain number {createJobRequest.ComplaintNumber}");
+
+                var job = new Job
+                {
+                    JobNumber = $"J",
+                    Name = complaint.Title,
+                    Complaint = complaint,
+                    ComplaintId = complaint.Id,
+                    Status = "Pending",
+                    Description = complaint.Description,
+                    Priority = createJobRequest.Priority,
+                    IsDeleted = true,
+                };
+
+                await _context.Job.AddAsync(job);
+                await _context.SaveChangesAsync();
+
+                return "Job created successfully";
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Job creation failed", ex);
+            }
         }
 
-        public async Task<IEnumerable<Job>> GetAllJobsAsync()
+        public async Task<string> DeleteJob(DeleteJobDto deleteJobReq)
         {
-            
-            return await _jobRepository.GetAllAsync();
-        }
+            try
+            {
+                var job = await (from j in _context.Job where j.JobNumber == deleteJobReq.JobNumber select j).FirstAsync();
 
-        public async Task<Job> GetJobByIdAsync(int id)
-        {
-            return await _jobRepository.GetByIdAsync(id);
-        }
+                if (job == null)
+                    throw new Exception($"Cannot find a job with a job number {deleteJobReq.JobNumber}");
 
-        public async Task CreateJobAsync(Job job)
-        {
-           
-            await _jobRepository.AddAsync(job);
-        }
+                job.IsDeleted = true;
+                await _context.SaveChangesAsync();
 
-        public async Task UpdateJobAsync(Job job)
-        {
-          
-            await _jobRepository.UpdateAsync(job);
-        }
-
-        public async Task DeleteJobAsync(int id)
-        {
-            // Check business rules before delete
-            await _jobRepository.DeleteAsync(id);
+                return "Job delete successfully!";
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Job deletion failed", ex);
+            }
         }
     }
 }
-*/
