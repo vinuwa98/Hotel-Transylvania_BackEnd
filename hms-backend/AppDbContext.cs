@@ -58,7 +58,7 @@ namespace HmsBackend
 
             // Configure Job -> AssignedManagerUser relationship (one User manages many Jobs)
             modelBuilder.Entity<Job>()
-                .HasOne(j => j.AssignedManagereUser)
+                .HasOne(j => j.AssignedManagerUser)
                 .WithMany()
                 .HasForeignKey(j => j.AssignedManagerUserId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete
@@ -79,11 +79,7 @@ namespace HmsBackend
                 .WithMany(u => u.JobUsers)
                 .HasForeignKey(ju => ju.UserId);
 
-            modelBuilder.Entity<Job>()
-                .HasOne(j => j.Cleaner)
-                .WithMany()
-                .HasForeignKey(j => j.CleanerId)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete
+           // Prevent cascade delete
 
             modelBuilder.Entity<Room>().HasData(
                 new Room { RoomId = 1, RoomNumber = "R001", RoomType = "Single", UserId = null },

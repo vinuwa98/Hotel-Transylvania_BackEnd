@@ -2,7 +2,7 @@
 {
     public class AssignCleanerDto
     {
-        public int ComplaintId { get; set; }
+        public string ComplaintId { get; set; }
         public string CleanerId { get; set; }
     }
 

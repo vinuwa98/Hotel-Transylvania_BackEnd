@@ -1,6 +1,5 @@
 ﻿using HmsBackend.DTOs;
 using HmsBackend.Models;
-using HmsBackend.Repositories.Interfaces;
 using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -62,5 +61,7 @@ namespace HmsBackend.Services
                 throw new InvalidOperationException("Job deletion failed", ex);
             }
         }
+
+
     }
 }
