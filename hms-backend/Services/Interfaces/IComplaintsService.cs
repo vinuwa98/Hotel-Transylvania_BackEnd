@@ -1,6 +1,9 @@
-﻿namespace hms_backend.Services.Interfaces
+﻿using HmsBackend.DTOs;
+
+namespace HmsBackend.Services.Interfaces
 {
     public interface IComplaintsService
     {
+        Task<List<ComplaintDto>> GetAllComplaints();
     }
 }

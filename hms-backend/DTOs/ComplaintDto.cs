@@ -6,7 +6,7 @@
         public DateTime DateTime { get; set; }
         public string Description { get; set; }
         public string ImgUrl { get; set; }
-
-
+        public string RoomNumber { get; set; }
+        public string ComplaintNumber { get; set; }
     }
 }

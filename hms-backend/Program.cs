@@ -54,6 +54,7 @@ builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IJobService, JobService>();
 builder.Services.AddScoped<IRoomService, RoomService>();
+builder.Services.AddScoped<IComplaintsService, ComplaintService>();
 
 builder.Services.AddCors(options =>
 {
@@ -129,7 +130,7 @@ using (var scope = app.Services.CreateScope())
     var context = services.GetRequiredService<AppDbContext>();
     var userManager = services.GetRequiredService<UserManager<User>>();
 
-    context.Database.Migrate(); // Apply migrations
+    //context.Database.Migrate(); // Apply migrations
     await DbSeeder.SeedAsync(context, userManager);
 }
 

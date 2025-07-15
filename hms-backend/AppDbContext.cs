@@ -1,5 +1,4 @@
 ﻿using HmsBackend.Models;
-using HmsBackend.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -87,12 +86,12 @@ namespace HmsBackend
                 .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete
 
             modelBuilder.Entity<Room>().HasData(
-                new Room { RoomId = 1, RoomType = "Single", UserId = null },
-                new Room { RoomId = 2, RoomType = "Double", UserId = null },
-                new Room { RoomId = 3, RoomType = "Deluxe", UserId = null },
-                new Room { RoomId = 4, RoomType = "Suite", UserId = null },
-                new Room { RoomId = 5, RoomType = "Family", UserId = null },
-                new Room { RoomId = 6, RoomType = "Presidential", UserId = null }
+                new Room { RoomId = 1, RoomNumber = "R001", RoomType = "Single", UserId = null },
+                new Room { RoomId = 2, RoomNumber = "R002", RoomType = "Double", UserId = null },
+                new Room { RoomId = 3, RoomNumber = "R003", RoomType = "Deluxe", UserId = null },
+                new Room { RoomId = 4, RoomNumber = "R004", RoomType = "Suite", UserId = null },
+                new Room { RoomId = 5, RoomNumber = "R005", RoomType = "Family", UserId = null },
+                new Room { RoomId = 6, RoomNumber = "R006", RoomType = "Presidential", UserId = null }
             );
         }
     }

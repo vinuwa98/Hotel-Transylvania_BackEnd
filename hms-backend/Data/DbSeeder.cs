@@ -17,6 +17,7 @@ public static class DbSeeder
             {
                 var complaint1 = new Complaint
                 {
+                    ComplaintNumber = "C001",
                     Title = "Leaking Tap",
                     Description = "Bathroom tap is leaking heavily",
                     DateTime = DateTime.Now,
@@ -27,6 +28,7 @@ public static class DbSeeder
 
                 var complaint2 = new Complaint
                 {
+                    ComplaintNumber = "C002",
                     Title = "AC Not Working",
                     Description = "AC in room is broken",
                     DateTime = DateTime.Now.AddDays(-1),

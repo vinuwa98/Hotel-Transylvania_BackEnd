@@ -15,7 +15,7 @@ namespace HmsBackend.Services
         {
             try
             {
-                var complaint = await (from c in _context.Complaint where c.ComplaintNumber == createJobRequest.ComplaintNumber select c).FirstOrDefaultAsync();
+                var complaint = await (from c in _context.Complaints where c.ComplaintNumber == createJobRequest.ComplaintNumber select c).FirstOrDefaultAsync();
 
                 if (complaint == null)
                     throw new Exception($"Cannot find a complaint with a complain number {createJobRequest.ComplaintNumber}");
