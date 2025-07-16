@@ -6,7 +6,7 @@ namespace HmsBackend.Models
     public class Complaint
     {
         [Key]
-        public string Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         [MaxLength(100)]
@@ -27,7 +27,7 @@ namespace HmsBackend.Models
         public User User { get; set; }
 
         [Required]
-        public string RoomId { get; set; }
+        public int RoomId { get; set; }
 
         public Room Room { get; set; }
 

@@ -6,13 +6,13 @@ namespace HmsBackend.Models
     public class Room
     {
         [Key]
-        public string RoomId { get; set; }
+        public int RoomId { get; set; }
 
         [Required]
         [MaxLength(50)]
         public string RoomType { get; set; }
 
-        public string? UserId { get; set; } //Make it nullable
+        public string? UserId { get; set; } 
 
         public User User { get; set; }
 

@@ -1,4 +1,5 @@
 using hms_backend.Services;
+using hms_backend.Services.Interfaces;
 using HmsBackend;
 using HmsBackend.Models;
 using HmsBackend.Repositories;
@@ -55,7 +56,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IJobService, JobService>();
-
+builder.Services.AddScoped<IRoomService, RoomService>();
 
 builder.Services.AddCors(options =>
 {
@@ -89,6 +90,9 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 {
     options.TokenLifespan = TimeSpan.FromHours(1);
 });
+
+
+
 
 builder.Services.AddAuthentication(options =>
 {

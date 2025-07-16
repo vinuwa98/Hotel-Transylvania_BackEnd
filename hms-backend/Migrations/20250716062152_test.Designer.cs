@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace hms_backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250715045243_new")]
-    partial class @new
+    [Migration("20250716062152_test")]
+    partial class test
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,8 +27,11 @@ namespace hms_backend.Migrations
 
             modelBuilder.Entity("HmsBackend.Models.Complaint", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("datetime2");
@@ -43,9 +46,8 @@ namespace hms_backend.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<string>("RoomId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -74,9 +76,8 @@ namespace hms_backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("ComplaintId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("ComplaintId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -96,9 +97,8 @@ namespace hms_backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("ComplaintId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("ComplaintId")
+                        .HasColumnType("int");
 
                     b.Property<string>("CreatedUserId")
                         .IsRequired()
@@ -152,8 +152,11 @@ namespace hms_backend.Migrations
 
             modelBuilder.Entity("HmsBackend.Models.Room", b =>
                 {
-                    b.Property<string>("RoomId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("RoomId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RoomId"));
 
                     b.Property<string>("RoomType")
                         .IsRequired()
@@ -172,34 +175,56 @@ namespace hms_backend.Migrations
                     b.HasData(
                         new
                         {
-                            RoomId = "R1",
+                            RoomId = 1,
                             RoomType = "Single"
                         },
                         new
                         {
-                            RoomId = "R2",
+                            RoomId = 2,
                             RoomType = "Double"
                         },
                         new
                         {
-                            RoomId = "R3",
+                            RoomId = 3,
                             RoomType = "Deluxe"
                         },
                         new
                         {
-                            RoomId = "R4",
+                            RoomId = 4,
                             RoomType = "Suite"
                         },
                         new
                         {
-                            RoomId = "R5",
+                            RoomId = 5,
                             RoomType = "Family"
                         },
                         new
                         {
-                            RoomId = "R6",
+                            RoomId = 6,
                             RoomType = "Presidential"
                         });
+                });
+
+            modelBuilder.Entity("HmsBackend.Models.RoomStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoomId");
+
+                    b.ToTable("RoomStatus");
                 });
 
             modelBuilder.Entity("HmsBackend.Models.User", b =>
@@ -498,6 +523,17 @@ namespace hms_backend.Migrations
                         .HasForeignKey("UserId");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HmsBackend.Models.RoomStatus", b =>
+                {
+                    b.HasOne("HmsBackend.Models.Room", "Room")
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
