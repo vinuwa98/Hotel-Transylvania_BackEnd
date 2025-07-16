@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace hms_backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250708083313_SixthMigration")]
-    partial class SixthMigration
+    [Migration("20250716065055_NewMig")]
+    partial class NewMig
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -43,6 +43,9 @@ namespace hms_backend.Migrations
                     b.Property<string>("ImgUrl")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<int>("RoomId")
                         .HasColumnType("int");
 
@@ -61,16 +64,34 @@ namespace hms_backend.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Complaint");
+                    b.ToTable("Complaints");
+                });
+
+            modelBuilder.Entity("HmsBackend.Models.ComplaintCleaner", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CleanerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("ComplaintId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CleanerId");
+
+                    b.HasIndex("ComplaintId");
+
+                    b.ToTable("ComplaintCleaners");
                 });
 
             modelBuilder.Entity("HmsBackend.Models.Job", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("AssignedManagerUserId")
                         .IsRequired()
@@ -114,8 +135,8 @@ namespace hms_backend.Migrations
 
             modelBuilder.Entity("HmsBackend.Models.JobUser", b =>
                 {
-                    b.Property<int>("JobId")
-                        .HasColumnType("int")
+                    b.Property<string>("JobId")
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnOrder(0);
 
                     b.Property<string>("UserId")
@@ -143,7 +164,6 @@ namespace hms_backend.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("RoomId");
@@ -151,6 +171,60 @@ namespace hms_backend.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Rooms");
+
+                    b.HasData(
+                        new
+                        {
+                            RoomId = 1,
+                            RoomType = "Single"
+                        },
+                        new
+                        {
+                            RoomId = 2,
+                            RoomType = "Double"
+                        },
+                        new
+                        {
+                            RoomId = 3,
+                            RoomType = "Deluxe"
+                        },
+                        new
+                        {
+                            RoomId = 4,
+                            RoomType = "Suite"
+                        },
+                        new
+                        {
+                            RoomId = 5,
+                            RoomType = "Family"
+                        },
+                        new
+                        {
+                            RoomId = 6,
+                            RoomType = "Presidential"
+                        });
+                });
+
+            modelBuilder.Entity("HmsBackend.Models.RoomStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoomId");
+
+                    b.ToTable("RoomStatus");
                 });
 
             modelBuilder.Entity("HmsBackend.Models.User", b =>
@@ -358,6 +432,33 @@ namespace hms_backend.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("hms_backend.Models.HmsBackend.Models.CleanerRoom", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AssignedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CleanerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CleanerId");
+
+                    b.HasIndex("RoomId");
+
+                    b.ToTable("CleanerRooms");
+                });
+
             modelBuilder.Entity("HmsBackend.Models.Complaint", b =>
                 {
                     b.HasOne("HmsBackend.Models.Room", "Room")
@@ -377,9 +478,28 @@ namespace hms_backend.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("HmsBackend.Models.ComplaintCleaner", b =>
+                {
+                    b.HasOne("HmsBackend.Models.User", "Cleaner")
+                        .WithMany()
+                        .HasForeignKey("CleanerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HmsBackend.Models.Complaint", "Complaint")
+                        .WithMany()
+                        .HasForeignKey("ComplaintId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cleaner");
+
+                    b.Navigation("Complaint");
+                });
+
             modelBuilder.Entity("HmsBackend.Models.Job", b =>
                 {
-                    b.HasOne("HmsBackend.Models.User", "AssignedManagereUser")
+                    b.HasOne("HmsBackend.Models.User", "AssignedManagerUser")
                         .WithMany()
                         .HasForeignKey("AssignedManagerUserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -397,7 +517,7 @@ namespace hms_backend.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("AssignedManagereUser");
+                    b.Navigation("AssignedManagerUser");
 
                     b.Navigation("Complaint");
 
@@ -427,11 +547,20 @@ namespace hms_backend.Migrations
                 {
                     b.HasOne("HmsBackend.Models.User", "User")
                         .WithMany("Rooms")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HmsBackend.Models.RoomStatus", b =>
+                {
+                    b.HasOne("HmsBackend.Models.Room", "Room")
+                        .WithMany()
+                        .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -483,6 +612,25 @@ namespace hms_backend.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("hms_backend.Models.HmsBackend.Models.CleanerRoom", b =>
+                {
+                    b.HasOne("HmsBackend.Models.User", "Cleaner")
+                        .WithMany()
+                        .HasForeignKey("CleanerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HmsBackend.Models.Room", "Room")
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Cleaner");
+
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("HmsBackend.Models.Complaint", b =>

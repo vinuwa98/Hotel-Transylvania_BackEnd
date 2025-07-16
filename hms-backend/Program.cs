@@ -1,9 +1,11 @@
-using HmsBackend.Services;
-using HmsBackend.Services.Interfaces;
+using hms_backend.Services;
+using hms_backend.Services.Interfaces;
 using HmsBackend;
 using HmsBackend.Models;
 using HmsBackend.Repositories;
 using HmsBackend.Repositories.Interfaces;
+using HmsBackend.Services;
+using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +19,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<IUserCountRepository, UserCountRepository>();
 builder.Services.AddScoped<IUserCountService, UserCountService>();
+
 
 
 builder.Services.AddSwaggerGen(c =>
@@ -53,6 +56,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IJobService, JobService>();
+builder.Services.AddScoped<IRoomService, RoomService>();
 
 builder.Services.AddCors(options =>
 {
@@ -86,6 +91,9 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 {
     options.TokenLifespan = TimeSpan.FromHours(1);
 });
+
+
+
 
 builder.Services.AddAuthentication(options =>
 {

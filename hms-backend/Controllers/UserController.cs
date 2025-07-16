@@ -199,6 +199,7 @@ namespace HmsBackend.Controllers
             return Ok(new { fullName });
         }
 
+
         [Authorize(Roles = "Supervisor,HelpDesk,Admin")]
         [HttpGet("get-cleaners")]
         public async Task<IActionResult> GetAllCleaners()
@@ -222,6 +223,14 @@ namespace HmsBackend.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving cleaners: " + ex.Message);
             }
+        }
+
+        [HttpGet("maintenance-staff")]
+        public async Task<IActionResult> GetMaintenanceStaff()
+        {
+            var users = await _userService.GetMaintenanceStaffAsync();
+            return Ok(users);
+
         }
 
     }

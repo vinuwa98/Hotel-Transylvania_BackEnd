@@ -33,7 +33,7 @@ namespace HmsBackend.Models
 
         public List<Job> Jobs { get; set; } = new();
 
-        public bool IsActive { get; set; } = true; // default is active
+        public bool IsActive { get; set; } = true; 
 
     }
 }

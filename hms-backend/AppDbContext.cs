@@ -13,6 +13,8 @@ namespace HmsBackend
         public DbSet<ComplaintCleaner> ComplaintCleaners { get; set; }
         public DbSet<CleanerRoom> CleanerRooms { get; set; }
 
+        public DbSet<RoomStatus> RoomStatus { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -59,7 +61,7 @@ namespace HmsBackend
 
             // Configure Job -> AssignedManagerUser relationship (one User manages many Jobs)
             modelBuilder.Entity<Job>()
-                .HasOne(j => j.AssignedManagereUser)
+                .HasOne(j => j.AssignedManagerUser)
                 .WithMany()
                 .HasForeignKey(j => j.AssignedManagerUserId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete
@@ -80,11 +82,7 @@ namespace HmsBackend
                 .WithMany(u => u.JobUsers)
                 .HasForeignKey(ju => ju.UserId);
 
-            modelBuilder.Entity<Job>()
-                .HasOne(j => j.Cleaner)
-                .WithMany()
-                .HasForeignKey(j => j.CleanerId)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete
+            // Prevent cascade delete
 
             modelBuilder.Entity<CleanerRoom>()
                 .HasOne(cr => cr.Room)
@@ -99,13 +97,14 @@ namespace HmsBackend
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Room>().HasData(
-                new Room { RoomId = 1, RoomType = "Single", UserId = null },
-                new Room { RoomId = 2, RoomType = "Double", UserId = null },
-                new Room { RoomId = 3, RoomType = "Deluxe", UserId = null },
-                new Room { RoomId = 4, RoomType = "Suite", UserId = null },
-                new Room { RoomId = 5, RoomType = "Family", UserId = null },
-                new Room { RoomId = 6, RoomType = "Presidential", UserId = null }
-            );
+                 new Room { RoomId = 1, RoomType = "Single", UserId = null },
+                 new Room { RoomId = 2, RoomType = "Double", UserId = null },
+                 new Room { RoomId = 3, RoomType = "Deluxe", UserId = null },
+                 new Room { RoomId = 4, RoomType = "Suite", UserId = null },
+                 new Room { RoomId = 5, RoomType = "Family", UserId = null },
+                 new Room { RoomId = 6, RoomType = "Presidential", UserId = null }
+             );
+
         }
     }
 }

@@ -9,7 +9,7 @@ namespace HmsBackend.Models
     public class ComplaintCleaner
     {
         [Key]
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         [Required]
         public int ComplaintId { get; set; }

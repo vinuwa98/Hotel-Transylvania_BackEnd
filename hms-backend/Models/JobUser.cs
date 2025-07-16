@@ -6,7 +6,7 @@ namespace HmsBackend.Models
     public class JobUser
     {
         [Key, Column(Order = 0)]
-        public int JobId { get; set; }
+        public string JobId { get; set; }
 
         public Job Job { get; set; }
 

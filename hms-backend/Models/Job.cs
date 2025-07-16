@@ -6,7 +6,7 @@ namespace HmsBackend.Models
     public class Job
     {
         [Key]
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         [Required]
         [MaxLength(100)]
@@ -30,7 +30,8 @@ namespace HmsBackend.Models
         [Required]
         public string AssignedManagerUserId { get; set; }
 
-        public User AssignedManagereUser { get; set; }
+   
+        public User AssignedManagerUser { get; set; }
 
         [Required]
         public int ComplaintId { get; set; }
@@ -39,8 +40,7 @@ namespace HmsBackend.Models
 
         public List<JobUser> JobUsers { get; set; } = new();
 
-        public string? CleanerId { get; set; }  // foreign key
-        public User? Cleaner { get; set; }      // navigation property
+ 
 
     }
 }
