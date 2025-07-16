@@ -1,4 +1,5 @@
 ﻿using HmsBackend.DTOs;
+using HmsBackend.Services;
 using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;

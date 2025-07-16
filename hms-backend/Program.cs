@@ -1,13 +1,15 @@
-using HmsBackend.Services;
-using HmsBackend.Services.Interfaces;
+using hms_backend.Services.Interfaces;
 using HmsBackend;
 using HmsBackend.Models;
 using HmsBackend.Repositories;
 using HmsBackend.Repositories.Interfaces;
+using HmsBackend.Services;
+using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -53,6 +55,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IComplaintService, ComplaintService>();
+
 
 builder.Services.AddCors(options =>
 {
@@ -102,7 +106,10 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+
+        NameClaimType = ClaimTypes.NameIdentifier,
+        RoleClaimType = ClaimTypes.Role
     };
 });
 
@@ -186,5 +193,6 @@ app.UseAuthorization();
 app.UseCors("AllowFrontend");
 
 app.MapControllers();
+app.UseStaticFiles();
 
 app.Run();

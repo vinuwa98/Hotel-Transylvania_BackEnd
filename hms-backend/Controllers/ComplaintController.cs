@@ -1,8 +1,12 @@
-﻿using HmsBackend.DTOs;
+﻿using hms_backend.Services.Interfaces;
+using HmsBackend.DTOs;
 using HmsBackend.Models;
+using HmsBackend.Services;
+using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace HmsBackend.Controllers
 {
@@ -10,12 +14,20 @@ namespace HmsBackend.Controllers
     [Route("api/[controller]")]
     public class ComplaintController : ControllerBase
     {
+        private readonly IComplaintService _complaintService;
         private readonly AppDbContext _context;
 
-        public ComplaintController(AppDbContext context)
+        public ComplaintController(IComplaintService complaintService, AppDbContext context)
         {
+            _complaintService = complaintService;
             _context = context;
         }
+
+
+        //public ComplaintController(AppDbContext context)
+        //{
+        //    _context = context;
+        //}
 
         [Authorize(Roles = "Supervisor")]
         [HttpGet("supervisor-complaints/{supervisorId}")]
@@ -62,5 +74,29 @@ namespace HmsBackend.Controllers
             return Ok(new { message = "Complaint deactivated successfully." });
         }
 
+        [Authorize(Roles = "Cleaner,Supervisor")]
+        [HttpPost("add-complaint")]
+        public async Task<IActionResult> AddComplaint([FromForm] ComplaintDto complaintDto)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            
+
+            if (userId == null)
+            {
+                return Unauthorized(new { message = "User not authenticated." });
+            }
+
+            
+            var result = await _complaintService.AddComplaintAsync(complaintDto, userId);
+
+            if (result)
+            {
+                return Ok(new { message = "Complaint submitted successfully." });
+            }
+
+            return BadRequest(new { message = "Failed to submit complaint." });
+        }
+
+        
     }
 }

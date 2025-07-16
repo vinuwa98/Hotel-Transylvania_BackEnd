@@ -1,5 +1,6 @@
 ﻿using HmsBackend.Models;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HmsBackend.Models
 {
@@ -7,6 +8,10 @@ namespace HmsBackend.Models
     {
         [Key]
         public int Id { get; set; }
+
+        [Required]
+        [MaxLength(10)]
+        public string ComplaintCode { get; set; } // C00001
 
         [Required]
         [MaxLength(100)]
@@ -18,14 +23,16 @@ namespace HmsBackend.Models
         [MaxLength(500)]
         public string? Description { get; set; }
 
-        [Url]
-        public string? ImgUrl { get; set; }
+        //public byte[]? ImgBlob { get; set; }
+
+        public string? ImagePath { get; set; }
 
         [Required]
         public string UserId { get; set; }
 
         public User User { get; set; }
 
+        [ForeignKey("Room")]
         [Required]
         public int RoomId { get; set; }
 

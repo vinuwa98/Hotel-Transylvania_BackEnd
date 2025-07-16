@@ -398,7 +398,8 @@ namespace HmsBackend.Services
 
             var claims = new List<Claim>
                             {
-                                new Claim("UserId", identityUser.Id.ToString())
+                                new Claim("UserId", identityUser.Id.ToString()),
+                                new Claim(ClaimTypes.NameIdentifier, identityUser.Id)
                             };
 
             foreach (var role in roles)
@@ -471,30 +472,6 @@ namespace HmsBackend.Services
                 return false;
             }
         }
-
-        public async Task<List<SupervisorComplaintDto>> GetComplaintsBySupervisorAsync(string supervisorId)
-        {
-            var complaints = await _context.Complaints
-                .Where(c => c.UserId == supervisorId && c.IsActive)
-                .Include(c => c.Room)
-                .Include(c => c.Jobs)
-                    .ThenInclude(j => j.JobUsers)
-                        .ThenInclude(ju => ju.User)
-                .Select(c => new SupervisorComplaintDto
-                {
-                    ComplaintId = c.Id,
-                    Title = c.Title,
-                    RoomNumber = c.Room.RoomType,
-                    CleanerName = c.Jobs
-                        .SelectMany(j => j.JobUsers)
-                        .Select(ju => ju.User.FirstName + " " + ju.User.LastName)
-                        .FirstOrDefault()
-                })
-                .ToListAsync();
-
-            return complaints;
-        }
-
 
         public async Task<bool> ActivateUserAsync(string userId)
         {
