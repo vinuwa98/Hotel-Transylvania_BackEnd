@@ -1,4 +1,6 @@
-﻿using HmsBackend.Models;
+﻿using hms_backend.Models.HmsBackend.Models;
+using HmsBackend.DTOs;
+using HmsBackend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -48,6 +50,49 @@ namespace HmsBackend.Controllers
                 Console.Write(ex.ToString());
                 return StatusCode(500);
             }
+        }
+
+        [Authorize(Roles = "Supervisor")]
+        [HttpPost("assign-room")]
+        public async Task<IActionResult> AssignRoom([FromBody] AssignRoomDto dto)
+        {
+            var exists = await _appDbContext.CleanerRooms
+                .AnyAsync(x => x.RoomId == dto.RoomId && x.CleanerId == dto.CleanerId);
+
+            if (exists)
+                return BadRequest("Cleaner already assigned to this room.");
+
+            var assign = new CleanerRoom
+            {
+                RoomId = dto.RoomId,
+                CleanerId = dto.CleanerId
+            };
+
+            _appDbContext.CleanerRooms.Add(assign);
+            await _appDbContext.SaveChangesAsync();
+
+            return Ok("Cleaner assigned to room successfully.");
+        }
+
+        [Authorize(Roles = "Supervisor")]
+        [HttpGet("room-assignments")]
+        public async Task<IActionResult> GetRoomAssignments()
+        {
+            var assignments = await _appDbContext.CleanerRooms
+                .Include(cr => cr.Room)
+                .Include(cr => cr.Cleaner)
+                .ToListAsync();
+
+            var result = assignments
+                .GroupBy(cr => cr.RoomId)
+                .Select(g => new
+                {
+                    RoomId = g.Key,
+                    RoomType = g.First().Room.RoomType,
+                    CleanerNames = g.Select(c => c.Cleaner.FirstName + " " + c.Cleaner.LastName).ToList()
+                });
+
+            return Ok(result);
         }
     }
 }
