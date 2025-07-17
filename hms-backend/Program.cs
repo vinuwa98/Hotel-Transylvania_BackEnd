@@ -20,6 +20,7 @@ builder.Services.AddScoped<IUserCountRepository, UserCountRepository>();
 builder.Services.AddScoped<IUserCountService, UserCountService>();
 
 
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "HmsBackend API", Version = "v1" });
@@ -89,6 +90,9 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 {
     options.TokenLifespan = TimeSpan.FromHours(1);
 });
+
+
+
 
 builder.Services.AddAuthentication(options =>
 {

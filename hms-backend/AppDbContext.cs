@@ -1,4 +1,5 @@
-﻿using HmsBackend.Models;
+﻿using hms_backend.Models.HmsBackend.Models;
+using HmsBackend.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -10,8 +11,11 @@ namespace HmsBackend
         public DbSet<Complaint> Complaints { get; set; }
         public DbSet<Job> Job => Set<Job>();
         public DbSet<ComplaintCleaner> ComplaintCleaners { get; set; }
+        public DbSet<CleanerRoom> CleanerRooms { get; set; }
         public DbSet<RoomStatus> RoomStatus { get; set; }
         public DbSet<JobUser> JobUsers { get; set; }
+
+        public DbSet<RoomStatus> RoomStatus { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -80,7 +84,19 @@ namespace HmsBackend
                 .WithMany(u => u.JobUsers)
                 .HasForeignKey(ju => ju.UserId);
 
-           // Prevent cascade delete
+            // Prevent cascade delete
+
+            modelBuilder.Entity<CleanerRoom>()
+                .HasOne(cr => cr.Room)
+                .WithMany()
+                .HasForeignKey(cr => cr.RoomId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CleanerRoom>()
+                .HasOne(cr => cr.Cleaner)
+                .WithMany()
+                .HasForeignKey(cr => cr.CleanerId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Room>().HasData(
                 new Room { RoomId = "1", RoomNumber = "R001", RoomType = "Single", UserId = null },

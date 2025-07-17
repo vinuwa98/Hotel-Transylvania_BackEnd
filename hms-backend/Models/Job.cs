@@ -40,7 +40,7 @@ namespace HmsBackend.Models
         public User? AssignedManagerUser { get; set; }
 
         [Required]
-        public string ComplaintId { get; set; }
+        public int ComplaintId { get; set; }
 
         public Complaint Complaint { get; set; }
 

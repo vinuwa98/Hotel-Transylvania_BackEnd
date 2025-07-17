@@ -19,13 +19,13 @@ namespace HmsBackend.Controllers
             try
             {
                 var dashboardData = await _roomService.GetDashboardData();
-
+        
                 return Ok(dashboardData);
             }
             catch
-            {
+        {
                 return NoContent();
-            }
+        }
         }
 
         [Authorize(Policy = "HelpDeskOnly")]
@@ -43,7 +43,7 @@ namespace HmsBackend.Controllers
             {
                 return NoContent();
             }
-        }
+            }
 
         [Authorize(Policy = "HelpDeskOnly")]
         [HttpGet]

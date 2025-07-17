@@ -8,6 +8,8 @@ namespace HmsBackend.Services.Interfaces
         Task<List<RoomDto>> GetAllRoomData();
         Task<List<RoomDto>> UpdateRoomStatus(UpdateRoomStatusDto updateRequest);
 
+        Task<RoomStatusDto> UpdateRoomStatusAsync(string jobId, string jobStatus);
+
         List<string> GetRoomStatusTypes();
     }
 }

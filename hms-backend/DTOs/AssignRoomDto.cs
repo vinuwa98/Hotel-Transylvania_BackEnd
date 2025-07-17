@@ -1,9 +1,8 @@
 ﻿namespace HmsBackend.DTOs
 {
-    public class AssignCleanerDto
+    public class AssignRoomDto
     {
-        public int ComplaintId { get; set; }
+        public int RoomId { get; set; }
         public string CleanerId { get; set; }
     }
-
 }

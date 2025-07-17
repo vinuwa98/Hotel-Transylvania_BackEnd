@@ -17,7 +17,7 @@ namespace HmsBackend.DTOs
         public string? AssignedManagerUserId { get; set; }
 
         
-        public required string ComplaintId { get; set; }
+        public required int ComplaintId { get; set; }
         public List<JobUserViewDto> Users { get; set; } = new();
         public string? AssignedManagerName { get; set; }
 
