@@ -1,4 +1,5 @@
-﻿using HmsBackend.DTOs;
+﻿using hms_backend.DTOs;
+using HmsBackend.DTOs;
 using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -78,5 +79,24 @@ namespace HmsBackend.Controllers
                 return NoContent();
             }
         }
+
+        [HttpPut("update-status/{jobId}")]
+        public async Task<IActionResult> UpdateStatus(string jobId, [FromBody] RoomStatusUpdateRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(jobId) || string.IsNullOrWhiteSpace(request?.JobStatus))
+            {
+                return BadRequest("JobId and JobStatus are required.");
+            }
+
+            var updatedStatus = await _roomService.UpdateRoomStatusAsync(jobId, request.JobStatus);
+
+            if (updatedStatus == null)
+            {
+                return NotFound("Room or status not found for the given JobId");
+            }
+
+            return Ok(updatedStatus);
+        }
+
     }
 }

@@ -9,10 +9,10 @@
         public class CleanerRoom
         {
             [Key]
-            public int Id { get; set; }
+            public string Id { get; set; }
 
             [Required]
-            public int RoomId { get; set; }
+            public string RoomId { get; set; }
             public Room Room { get; set; }
 
             [Required]

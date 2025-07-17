@@ -1,10 +1,6 @@
-﻿using HmsBackend.DTOs;
-using HmsBackend.DTOs;
-using HmsBackend.Models;
-using HmsBackend.Services.Interfaces;
+﻿using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace HmsBackend.Controllers
 {

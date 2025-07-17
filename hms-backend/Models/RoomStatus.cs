@@ -7,10 +7,10 @@ namespace HmsBackend.Models
     public class RoomStatus
     {
         [Key]
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         [Required]
-        public required int RoomId { get; set; }
+        public required string RoomId { get; set; }
 
         [ForeignKey("RoomId")]
         public required Room Room { get; set; }

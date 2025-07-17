@@ -15,8 +15,6 @@ namespace HmsBackend
         public DbSet<RoomStatus> RoomStatus { get; set; }
         public DbSet<JobUser> JobUsers { get; set; }
 
-        public DbSet<RoomStatus> RoomStatus { get; set; }
-
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

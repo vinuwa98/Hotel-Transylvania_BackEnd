@@ -1,8 +1,8 @@
-﻿namespace hms_backend.DTOs
+﻿namespace HmsBackend.DTOs
 {
     public class RoomStatusDto
     {
-        public  int RoomId { get; set; }
+        public  string RoomId { get; set; }
         public  string Status { get; set; }
     }
 }

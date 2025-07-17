@@ -6,7 +6,7 @@ namespace HmsBackend.Models
     public class Complaint
     {
         [Key]
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         [Required]
         public required string ComplaintNumber { get; set; }
@@ -30,7 +30,7 @@ namespace HmsBackend.Models
         public User User { get; set; }
 
         [Required]
-        public int RoomId { get; set; }
+        public string RoomId { get; set; }
 
         public Room Room { get; set; }
 

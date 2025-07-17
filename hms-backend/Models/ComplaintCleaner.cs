@@ -12,7 +12,7 @@ namespace HmsBackend.Models
         public string Id { get; set; }
 
         [Required]
-        public int ComplaintId { get; set; }
+        public string ComplaintId { get; set; }
 
         [ForeignKey("ComplaintId")]
         public Complaint Complaint { get; set; }

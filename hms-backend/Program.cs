@@ -3,7 +3,6 @@ using HmsBackend;
 using HmsBackend.Models;
 using HmsBackend.Repositories;
 using HmsBackend.Repositories.Interfaces;
-using HmsBackend.Services;
 using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
