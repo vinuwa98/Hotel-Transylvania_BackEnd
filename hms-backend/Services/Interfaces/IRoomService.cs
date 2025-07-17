@@ -1,5 +1,4 @@
 ﻿using HmsBackend.DTOs;
-using HmsBackend.DTOs;
 
 namespace HmsBackend.Services.Interfaces
 {
@@ -8,5 +7,7 @@ namespace HmsBackend.Services.Interfaces
         Task<RoomDashboardDto> GetDashboardData();
         Task<List<RoomDto>> GetAllRoomData();
         Task<List<RoomDto>> UpdateRoomStatus(UpdateRoomStatusDto updateRequest);
+
+        List<string> GetRoomStatusTypes();
     }
 }

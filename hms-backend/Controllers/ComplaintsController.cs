@@ -1,4 +1,4 @@
-﻿namespace hms_backend.Controllers
+﻿namespace HmsBackend.Controllers
 {
     public class ComplaintsController
     {

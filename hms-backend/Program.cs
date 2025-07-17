@@ -1,4 +1,4 @@
-using hms_backend.Services;
+using HmsBackend.Services;
 using HmsBackend;
 using HmsBackend.Models;
 using HmsBackend.Repositories;
@@ -132,7 +132,7 @@ using (var scope = app.Services.CreateScope())
     var userManager = services.GetRequiredService<UserManager<User>>();
 
     //context.Database.Migrate(); // Apply migrations
-    await DbSeeder.SeedAsync(context, userManager);
+    await DbSeeder.SeedDatabaseAsync(context, userManager);
 }
 
 async Task SeedRolesAndAdminAsync(IServiceProvider services)

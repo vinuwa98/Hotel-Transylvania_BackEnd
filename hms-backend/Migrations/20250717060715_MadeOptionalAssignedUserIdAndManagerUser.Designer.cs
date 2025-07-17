@@ -12,13 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace hms_backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-<<<<<<<< HEAD:hms-backend/Migrations/20250715094424_ChangedNameComplaintToComplaints.Designer.cs
-    [Migration("20250715094424_ChangedNameComplaintToComplaints")]
-    partial class ChangedNameComplaintToComplaints
-========
-    [Migration("20250715045243_new")]
-    partial class @new
->>>>>>>> 1e6fea4f7ecfe21c0a07b5415b6e83a294e5c6f7:hms-backend/Migrations/20250715045243_new.Designer.cs
+    [Migration("20250717060715_MadeOptionalAssignedUserIdAndManagerUser")]
+    partial class MadeOptionalAssignedUserIdAndManagerUser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -99,10 +94,10 @@ namespace hms_backend.Migrations
             modelBuilder.Entity("HmsBackend.Models.Job", b =>
                 {
                     b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("AssignedManagerUserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ComplaintId")
@@ -163,7 +158,7 @@ namespace hms_backend.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("JobUser");
+                    b.ToTable("JobUsers");
                 });
 
             modelBuilder.Entity("HmsBackend.Models.Room", b =>
@@ -192,62 +187,38 @@ namespace hms_backend.Migrations
                     b.HasData(
                         new
                         {
-<<<<<<<< HEAD:hms-backend/Migrations/20250715094424_ChangedNameComplaintToComplaints.Designer.cs
-                            RoomId = 1,
+                            RoomId = "1",
                             RoomNumber = "R001",
-========
-                            RoomId = "R1",
->>>>>>>> 1e6fea4f7ecfe21c0a07b5415b6e83a294e5c6f7:hms-backend/Migrations/20250715045243_new.Designer.cs
                             RoomType = "Single"
                         },
                         new
                         {
-<<<<<<<< HEAD:hms-backend/Migrations/20250715094424_ChangedNameComplaintToComplaints.Designer.cs
-                            RoomId = 2,
+                            RoomId = "2",
                             RoomNumber = "R002",
-========
-                            RoomId = "R2",
->>>>>>>> 1e6fea4f7ecfe21c0a07b5415b6e83a294e5c6f7:hms-backend/Migrations/20250715045243_new.Designer.cs
                             RoomType = "Double"
                         },
                         new
                         {
-<<<<<<<< HEAD:hms-backend/Migrations/20250715094424_ChangedNameComplaintToComplaints.Designer.cs
-                            RoomId = 3,
+                            RoomId = "3",
                             RoomNumber = "R003",
-========
-                            RoomId = "R3",
->>>>>>>> 1e6fea4f7ecfe21c0a07b5415b6e83a294e5c6f7:hms-backend/Migrations/20250715045243_new.Designer.cs
                             RoomType = "Deluxe"
                         },
                         new
                         {
-<<<<<<<< HEAD:hms-backend/Migrations/20250715094424_ChangedNameComplaintToComplaints.Designer.cs
-                            RoomId = 4,
+                            RoomId = "4",
                             RoomNumber = "R004",
-========
-                            RoomId = "R4",
->>>>>>>> 1e6fea4f7ecfe21c0a07b5415b6e83a294e5c6f7:hms-backend/Migrations/20250715045243_new.Designer.cs
                             RoomType = "Suite"
                         },
                         new
                         {
-<<<<<<<< HEAD:hms-backend/Migrations/20250715094424_ChangedNameComplaintToComplaints.Designer.cs
-                            RoomId = 5,
+                            RoomId = "5",
                             RoomNumber = "R005",
-========
-                            RoomId = "R5",
->>>>>>>> 1e6fea4f7ecfe21c0a07b5415b6e83a294e5c6f7:hms-backend/Migrations/20250715045243_new.Designer.cs
                             RoomType = "Family"
                         },
                         new
                         {
-<<<<<<<< HEAD:hms-backend/Migrations/20250715094424_ChangedNameComplaintToComplaints.Designer.cs
-                            RoomId = 6,
+                            RoomId = "6",
                             RoomNumber = "R006",
-========
-                            RoomId = "R6",
->>>>>>>> 1e6fea4f7ecfe21c0a07b5415b6e83a294e5c6f7:hms-backend/Migrations/20250715045243_new.Designer.cs
                             RoomType = "Presidential"
                         });
                 });
@@ -260,8 +231,9 @@ namespace hms_backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("RoomId")
-                        .HasColumnType("int");
+                    b.Property<string>("RoomId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -522,8 +494,7 @@ namespace hms_backend.Migrations
                     b.HasOne("HmsBackend.Models.User", "AssignedManagerUser")
                         .WithMany()
                         .HasForeignKey("AssignedManagerUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("HmsBackend.Models.Complaint", "Complaint")
                         .WithMany("Jobs")

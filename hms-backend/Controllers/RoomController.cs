@@ -30,6 +30,23 @@ namespace HmsBackend.Controllers
 
         [Authorize(Policy = "HelpDeskOnly")]
         [HttpGet]
+        [Route("room-status-types")]
+        public IActionResult GetRoomStatusTypes()
+        {
+            try
+            {
+                var types = _roomService.GetRoomStatusTypes();
+
+                return Ok(types);
+            }
+            catch
+            {
+                return NoContent();
+            }
+        }
+
+        [Authorize(Policy = "HelpDeskOnly")]
+        [HttpGet]
         [Route("all-rooms")]
         public async Task<IActionResult> GetAllRoomData()
         {
@@ -48,7 +65,7 @@ namespace HmsBackend.Controllers
         [Authorize(Policy = "HelpDeskOnly")]
         [HttpPost]
         [Route("update-room-status")]
-        public async Task<IActionResult> UpdateRoom(UpdateRoomStatusDto updateRequest)
+        public async Task<IActionResult> UpdateRoomStatus(UpdateRoomStatusDto updateRequest)
         {
             try
             {

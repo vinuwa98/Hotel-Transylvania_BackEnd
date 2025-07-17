@@ -5,7 +5,7 @@ namespace HmsBackend.Models
 {
     public class Room
     {
-        [Key]
+        //[Key]
         public string RoomId { get; set; }
 
         [Required]

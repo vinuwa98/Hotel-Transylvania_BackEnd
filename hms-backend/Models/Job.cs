@@ -1,11 +1,13 @@
 ﻿using HmsBackend.Models;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HmsBackend.Models
 {
     public class Job
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
         [Required]
@@ -28,16 +30,14 @@ namespace HmsBackend.Models
         [MaxLength(20)]
         public string? Priority { get; set; }
 
-        [Required]
-        public string CreatedUserId { get; set; }
+        //[Required]
+        public string? CreatedUserId { get; set; }
 
-        public User CreatedUser { get; set; }
+        public User? CreatedUser { get; set; }
 
-        [Required]
-        public string AssignedManagerUserId { get; set; }
+        public string? AssignedManagerUserId { get; set; }
 
-   
-        public User AssignedManagerUser { get; set; }
+        public User? AssignedManagerUser { get; set; }
 
         [Required]
         public string ComplaintId { get; set; }
@@ -45,8 +45,5 @@ namespace HmsBackend.Models
         public Complaint Complaint { get; set; }
 
         public List<JobUser> JobUsers { get; set; } = new();
-
- 
-
     }
 }

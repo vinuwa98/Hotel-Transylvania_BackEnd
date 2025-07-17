@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace hms_backend.Migrations
 {
     /// <inheritdoc />
-    public partial class @new : Migration
+    public partial class ChangedRoomModel : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -165,6 +165,7 @@ namespace hms_backend.Migrations
                 columns: table => new
                 {
                     RoomId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    RoomNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     RoomType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
@@ -183,6 +184,7 @@ namespace hms_backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ComplaintNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     DateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
@@ -206,6 +208,26 @@ namespace hms_backend.Migrations
                         principalTable: "Rooms",
                         principalColumn: "RoomId",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RoomStatus",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RoomId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RoomStatus", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RoomStatus_Rooms_RoomId",
+                        column: x => x.RoomId,
+                        principalTable: "Rooms",
+                        principalColumn: "RoomId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -238,8 +260,10 @@ namespace hms_backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    JobNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     Priority = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     CreatedUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -295,15 +319,15 @@ namespace hms_backend.Migrations
 
             migrationBuilder.InsertData(
                 table: "Rooms",
-                columns: new[] { "RoomId", "RoomType", "UserId" },
+                columns: new[] { "RoomId", "RoomNumber", "RoomType", "UserId" },
                 values: new object[,]
                 {
-                    { "R1", "Single", null },
-                    { "R2", "Double", null },
-                    { "R3", "Deluxe", null },
-                    { "R4", "Suite", null },
-                    { "R5", "Family", null },
-                    { "R6", "Presidential", null }
+                    { "1", "R001", "Single", null },
+                    { "2", "R002", "Double", null },
+                    { "3", "R003", "Deluxe", null },
+                    { "4", "R004", "Suite", null },
+                    { "5", "R005", "Family", null },
+                    { "6", "R006", "Presidential", null }
                 });
 
             migrationBuilder.CreateIndex(
@@ -389,6 +413,11 @@ namespace hms_backend.Migrations
                 name: "IX_Rooms_UserId",
                 table: "Rooms",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RoomStatus_RoomId",
+                table: "RoomStatus",
+                column: "RoomId");
         }
 
         /// <inheritdoc />
@@ -414,6 +443,9 @@ namespace hms_backend.Migrations
 
             migrationBuilder.DropTable(
                 name: "JobUser");
+
+            migrationBuilder.DropTable(
+                name: "RoomStatus");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

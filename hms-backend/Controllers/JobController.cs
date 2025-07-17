@@ -1,14 +1,7 @@
-﻿using hms_backend.DTOs;
-using HmsBackend;
-using HmsBackend.Models;
-using HmsBackend.Services;
+﻿using HmsBackend.DTOs;
 using HmsBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace HmsBackend.Controllers
 {
@@ -29,10 +22,28 @@ namespace HmsBackend.Controllers
                 var result = await _jobService.CreateAJob(jobCreateRequest);
 
                 return Ok(result);
-        }
+            }
             catch (Exception ex)
-        {
+            {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize(Policy = "HelpDeskOnly")]
+        [HttpPost]
+        [Route("delete-job")]
+        public async Task<IActionResult> DeleteThisJob(DeleteJobDto deleteJobReq)
+        {
+            try
+            {
+                var result = await _jobService.DeleteJob(deleteJobReq);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [Authorize(Roles = "MaintenanceManager,HelpDesk")]
@@ -52,6 +63,7 @@ namespace HmsBackend.Controllers
             var job = await _jobService.UpdateJobUsersAsync(updateDto);
             return Ok(job);
         }
+
         [Authorize(Roles = "MaintenanceManager")]
         [HttpPut("update-job-status")]
         public async Task<IActionResult> UpdateJobStatus([FromBody] UpdateJobStatusDto updateDto)
@@ -62,18 +74,23 @@ namespace HmsBackend.Controllers
             return Ok(updatedJob);
         }
 
-        [HttpGet("dashboard-summary")]
-        [Authorize(Roles = "Admin,MaintenanceManager")]
-        public async Task<IActionResult> GetDashboardSummary()
+        [Authorize(Roles = "MaintenanceManager,HelpDesk")]
+        [Route("view-jobs")]
+        [HttpGet]
+        public async Task<IActionResult> GetAllJobsAsync()
         {
-            var summary = await _jobService.GetDashboardSummaryAsync();
-            return Ok(summary);
-                return BadRequest(ex.Message);
-            }
+            var jobs = await _jobService.GetAllJobsAsync();
+            return Ok(jobs);
         }
 
+        //[HttpGet("dashboard-summary")]
+        //[Authorize(Roles = "Admin,MaintenanceManager")]
+        //public async Task<IActionResult> GetDashboardSummary()
+        //{
+        //    var summary = await _jobService.GetDashboardSummaryAsync();
+        //    return Ok(summary);
+        //        return BadRequest(ex.Message);
+        //    }
+        //}
     }
-
-
 }
-

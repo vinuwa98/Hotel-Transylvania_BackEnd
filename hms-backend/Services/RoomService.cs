@@ -1,5 +1,4 @@
 ﻿using HmsBackend.DTOs;
-using HmsBackend.DTOs;
 using HmsBackend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -87,6 +86,11 @@ namespace HmsBackend.Services
             {
                 throw new InvalidOperationException("Updating room data failed: ", ex);
             }
+        }
+
+        public List<string> GetRoomStatusTypes()
+        {
+            return new List<string> { "Occupied", "Reserved",  "Available", "Maintenance" };
         }
     }
 }

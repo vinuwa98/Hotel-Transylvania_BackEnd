@@ -1,6 +1,6 @@
 ﻿using HmsBackend.Models;
 
-namespace hms_backend.DTOs
+namespace HmsBackend.DTOs
 {
     public class UpdateJobUsersDto
     {

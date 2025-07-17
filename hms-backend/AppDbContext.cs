@@ -11,6 +11,7 @@ namespace HmsBackend
         public DbSet<Job> Job => Set<Job>();
         public DbSet<ComplaintCleaner> ComplaintCleaners { get; set; }
         public DbSet<RoomStatus> RoomStatus { get; set; }
+        public DbSet<JobUser> JobUsers { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -82,12 +83,12 @@ namespace HmsBackend
            // Prevent cascade delete
 
             modelBuilder.Entity<Room>().HasData(
-                new Room { RoomId = 1, RoomNumber = "R001", RoomType = "Single", UserId = null },
-                new Room { RoomId = 2, RoomNumber = "R002", RoomType = "Double", UserId = null },
-                new Room { RoomId = 3, RoomNumber = "R003", RoomType = "Deluxe", UserId = null },
-                new Room { RoomId = 4, RoomNumber = "R004", RoomType = "Suite", UserId = null },
-                new Room { RoomId = 5, RoomNumber = "R005", RoomType = "Family", UserId = null },
-                new Room { RoomId = 6, RoomNumber = "R006", RoomType = "Presidential", UserId = null }
+                new Room { RoomId = "1", RoomNumber = "R001", RoomType = "Single", UserId = null },
+                new Room { RoomId = "2", RoomNumber = "R002", RoomType = "Double", UserId = null },
+                new Room { RoomId = "3", RoomNumber = "R003", RoomType = "Deluxe", UserId = null },
+                new Room { RoomId = "4", RoomNumber = "R004", RoomType = "Suite", UserId = null },
+                new Room { RoomId = "5", RoomNumber = "R005", RoomType = "Family", UserId = null },
+                new Room { RoomId = "6", RoomNumber = "R006", RoomType = "Presidential", UserId = null }
             );
         }
     }
